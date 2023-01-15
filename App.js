@@ -1,16 +1,20 @@
-import { StyleSheet, Text, View, Image, Button } from "react-native";
+import { StyleSheet, Text, View, Image } from "react-native";
 import Constants from "expo-constants";
 import { Formik } from "formik";
 import * as Yup from "yup";
 
 // Own dependecies
-import AppInput from "./components/Form/Input";
+import AppInput from "./components/UI/Input";
+import Button from "./components/UI/Button";
 import Logo from "./components/Logo/Logo";
 
 // Validation
 const validationSchema = Yup.object().shape({
-  email: Yup.string().required().email().label("Email"),
-  password: Yup.string().required().min(6).label("Password"),
+  email: Yup.string().required().email().label("Email input"),
+  password: Yup.string()
+    .required()
+    .min(6, "Enter at least 6 characters for the password")
+    .label("Password"),
 });
 
 export default function App() {
@@ -23,16 +27,26 @@ export default function App() {
           onSubmit={(values) => console.log(values)}
           validationSchema={validationSchema}
         >
-          {({ handleChange, handleBlur, errors, handleSubmit, values }) => (
+          {({
+            handleChange,
+            handleBlur,
+            errors,
+            handleSubmit,
+            setFieldTouched,
+            values,
+            touched,
+          }) => (
             <>
               <AppInput
                 autoCorrect={false}
                 autoComplete="off"
                 error={errors.email}
                 name="email"
+                onBlur={() => setFieldTouched("email")}
                 onChange={handleChange("email")}
                 placeholder="Enter email"
                 value={values.email}
+                visible={touched.email}
               />
 
               <AppInput
@@ -40,12 +54,23 @@ export default function App() {
                 autoComplete="off"
                 error={errors.password}
                 name="password"
+                onBlur={() => setFieldTouched("password")}
                 onChange={handleChange("password")}
                 placeholder="Enter password"
                 secureTextEntry
                 value={values.password}
+                visible={touched.password}
               />
-              <Button title="Click" onPress={handleSubmit} />
+
+              <Button
+                styleObject={{
+                  loginBtn: styles.loginBtn,
+                  loginBtnText: styles.loginBtnText,
+                }}
+                title="Login"
+                onPress={handleSubmit}
+                underlayColor="rgba(0, 149, 246, 1)"
+              />
             </>
           )}
         </Formik>
@@ -65,5 +90,15 @@ const styles = StyleSheet.create({
   form: {
     paddingVertical: 20,
     width: "80%",
+  },
+  loginBtn: {
+    backgroundColor: "rgba(0, 149, 246, .7)",
+    marginTop: 10,
+  },
+  loginBtnText: {
+    textAlign: "center",
+    color: "white",
+    fontSize: 17,
+    letterSpacing: 0.4,
   },
 });
