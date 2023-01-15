@@ -14,7 +14,7 @@ const AppInput = ({ error = undefined, onChange, value, ...others }) => {
         value={value}
         {...others}
       />
-      {error && <Text style={styles.error}>Some error</Text>}
+      {error && <Text style={styles.error}>{error}</Text>}
     </>
   );
 };

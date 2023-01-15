@@ -1,10 +1,17 @@
 import { StyleSheet, Text, View, Image, Button } from "react-native";
 import Constants from "expo-constants";
 import { Formik } from "formik";
+import * as Yup from "yup";
 
 // Own dependecies
 import AppInput from "./components/Form/Input";
 import Logo from "./components/Logo/Logo";
+
+// Validation
+const validationSchema = Yup.object().shape({
+  email: Yup.string().required().email().label("Email"),
+  password: Yup.string().required().min(6).label("Password"),
+});
 
 export default function App() {
   return (
@@ -14,12 +21,14 @@ export default function App() {
         <Formik
           initialValues={{ email: "", password: "" }}
           onSubmit={(values) => console.log(values)}
+          validationSchema={validationSchema}
         >
-          {({ handleChange, handleBlur, handleSubmit, values }) => (
+          {({ handleChange, handleBlur, errors, handleSubmit, values }) => (
             <>
               <AppInput
                 autoCorrect={false}
-                autoComplete={false}
+                autoComplete="off"
+                error={errors.email}
                 name="email"
                 onChange={handleChange("email")}
                 placeholder="Enter email"
@@ -28,7 +37,8 @@ export default function App() {
 
               <AppInput
                 autoCorrect={false}
-                autoComplete={false}
+                autoComplete="off"
+                error={errors.password}
                 name="password"
                 onChange={handleChange("password")}
                 placeholder="Enter password"
