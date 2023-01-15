@@ -1,12 +1,14 @@
-import { StyleSheet, Text, View, Image } from "react-native";
+import { StyleSheet, View } from "react-native";
 import Constants from "expo-constants";
 import { Formik } from "formik";
 import * as Yup from "yup";
+import { signInWithEmailAndPassword } from "firebase/auth";
 
 // Own dependecies
 import AppInput from "./components/UI/Input";
 import Button from "./components/UI/Button";
 import Logo from "./components/Logo/Logo";
+import { auth } from "./firebase/config";
 
 // Validation
 const validationSchema = Yup.object().shape({
@@ -18,18 +20,27 @@ const validationSchema = Yup.object().shape({
 });
 
 export default function App() {
+  const handleLogin = async (values) => {
+    console.log(5);
+    const res = await signInWithEmailAndPassword(
+      auth,
+      "test@test.bg",
+      "123456"
+    );
+    console.log(res);
+  };
+
   return (
     <View style={styles.container}>
       <Logo />
       <View style={styles.form}>
         <Formik
           initialValues={{ email: "", password: "" }}
-          onSubmit={(values) => console.log(values)}
+          onSubmit={(values) => handleLogin(values)}
           validationSchema={validationSchema}
         >
           {({
             handleChange,
-            handleBlur,
             errors,
             handleSubmit,
             setFieldTouched,
