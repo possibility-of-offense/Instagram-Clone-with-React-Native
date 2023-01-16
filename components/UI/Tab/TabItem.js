@@ -5,7 +5,7 @@ import { Text } from "react-native";
 // Own Dependecies
 import colors from "../../../themes/colors";
 
-const TabItem = (currentRoute, icon, route, text, type) => {
+const TabItem = (currentRoute, icon, route, text, type, last = false) => {
   return {
     tabBarIcon: ({ color, size, focused }) => {
       return type === "entypo" ? (
@@ -23,11 +23,13 @@ const TabItem = (currentRoute, icon, route, text, type) => {
       );
     },
     tabBarItemStyle: {
-      borderRightColor: currentRoute === route ? colors.primary : colors.dark,
-      borderRightWidth: 1,
-    },
-    tabBarBadgeStyle: {
-      color: "red",
+      borderRightColor:
+        last === false
+          ? currentRoute === route
+            ? colors.primary
+            : colors.dark
+          : "transparent",
+      borderRightWidth: last === false ? 1 : 0,
     },
     tabBarLabel: ({ focused }) => (
       <Text style={{ color: focused ? colors.primary : colors.dark }}>

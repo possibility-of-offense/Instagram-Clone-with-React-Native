@@ -96,8 +96,8 @@ function LoginScreen({ navigation }) {
               <Button
                 disabled={loading}
                 styleObject={{
-                  loginBtn: styles.loginBtn,
-                  loginBtnText: styles.loginBtnText,
+                  loginBtn: styles.btn,
+                  loginBtnText: styles.btnText,
                 }}
                 title="Login"
                 onPress={handleSubmit}

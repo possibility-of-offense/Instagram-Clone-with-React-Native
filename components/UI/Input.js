@@ -1,13 +1,27 @@
+import React, { useEffect, useRef } from "react";
 import { Text, TextInput, StyleSheet } from "react-native";
 
 const AppInput = ({
   error = undefined,
   onBlur,
   onChange,
+  styleObj = {},
+  toFocus = undefined,
   value,
   visible,
   ...others
 }) => {
+  const inputRef = useRef();
+
+  // TODO focus on if the parent tab is focused!!!
+  useEffect(() => {
+    if (toFocus) {
+      inputRef.current.focus();
+    }
+
+    return () => inputRef.current.blur();
+  }, [toFocus]);
+
   return (
     <>
       <TextInput
@@ -16,9 +30,11 @@ const AppInput = ({
           {
             marginBottom: error && visible ? 3 : 10,
           },
+          styleObj,
         ]}
         onBlur={onBlur}
         onChangeText={onChange}
+        ref={inputRef}
         value={value}
         {...others}
       />

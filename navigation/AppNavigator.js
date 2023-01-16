@@ -53,7 +53,8 @@ const AppNavigator = () => {
             "post-add",
             "Add Post",
             "Add Post",
-            "material-design"
+            "material-design",
+            true
           ),
         }}
       />

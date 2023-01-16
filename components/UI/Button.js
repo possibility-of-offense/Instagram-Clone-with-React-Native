@@ -3,13 +3,13 @@ import { Text, View, StyleSheet, TouchableHighlight } from "react-native";
 
 function Button({ disabled, styleObject, title, onPress, underlayColor }) {
   return (
-    <View style={[styles.container, styleObject.loginBtn]}>
+    <View style={[styles.container, styleObject?.btn]}>
       <TouchableHighlight
         disabled={disabled}
         onPress={onPress}
         underlayColor={underlayColor}
       >
-        <Text style={[styles.text, styleObject.loginBtnText]}>{title}</Text>
+        <Text style={[styles.text, styleObject?.btnText]}>{title}</Text>
       </TouchableHighlight>
     </View>
   );
