@@ -19,7 +19,7 @@ function Error({ error }) {
         setMsg("Wrong password!");
         break;
       default:
-        setMsg("Error");
+        setMsg(error);
     }
   }, []);
 

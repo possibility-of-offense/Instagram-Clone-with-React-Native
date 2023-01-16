@@ -2,8 +2,9 @@ import Constants from "expo-constants";
 import { Formik } from "formik";
 import React, { useContext, useState } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import * as Yup from "yup";
+import { useNetInfo } from "@react-native-community/netinfo";
 
 // Own Dependencies
 import AppInput from "../components/UI/Input";
@@ -29,7 +30,12 @@ function LoginScreen({ navigation }) {
   const [error, setError] = useState(null);
   const authContext = useContext(AuthContext);
 
+  const netInfo = useNetInfo();
+
   const handleLogin = async (values) => {
+    if (netInfo.type !== "unknown" && netInfo.isInternetReachable === false)
+      return;
+
     try {
       setError(null);
       setLoading(true);
@@ -104,12 +110,17 @@ function LoginScreen({ navigation }) {
           )}
         </Formik>
       </View>
+
       {error && <Error error={error} />}
 
-      {loading && (
-        <View style={styles.animation}>
-          <Loader visible={loading} />
-        </View>
+      {netInfo.type !== "unknown" && netInfo.isInternetReachable === false ? (
+        <Error error="The internet is gone!" />
+      ) : (
+        loading && (
+          <View style={styles.animation}>
+            <Loader visible={loading} />
+          </View>
+        )
       )}
     </View>
   );
