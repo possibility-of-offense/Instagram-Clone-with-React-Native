@@ -1,17 +1,16 @@
 import * as React from "react";
 import Svg, { Path } from "react-native-svg";
 
-export default function Logo(props) {
+export default function Logo({ height = 59, width = 143 }) {
   return (
     <Svg
       aria-label="Instagram"
       className="_ab6-"
       color="#262626"
       fill="#262626"
-      height={59}
+      height={height}
       viewBox="32 4 113 32"
-      width={143}
-      {...props}
+      width={width}
     >
       <Path
         clipRule="evenodd"
