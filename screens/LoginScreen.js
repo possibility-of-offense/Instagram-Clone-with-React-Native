@@ -1,8 +1,8 @@
 import Constants from "expo-constants";
 import { Formik } from "formik";
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { View, StyleSheet } from "react-native";
+import { StyleSheet, View } from "react-native";
 import * as Yup from "yup";
 
 // Own Dependencies
@@ -12,6 +12,8 @@ import { AuthContext } from "../context/AuthContext";
 import Button from "../components/UI/Button";
 import colors from "../themes/colors";
 import Logo from "../components/Logo/Logo";
+import Loader from "../components/UI/Loader";
+import Error from "../components/UI/Error";
 
 // Validation
 const validationSchema = Yup.object().shape({
@@ -23,15 +25,26 @@ const validationSchema = Yup.object().shape({
 });
 
 function LoginScreen({ navigation }) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const authContext = useContext(AuthContext);
 
   const handleLogin = async (values) => {
-    const userInfo = await signInWithEmailAndPassword(
-      auth,
-      values.email,
-      values.password
-    );
-    authContext.setUser(userInfo);
+    try {
+      setError(null);
+      setLoading(true);
+      const userInfo = await signInWithEmailAndPassword(
+        auth,
+        values.email,
+        values.password
+      );
+
+      authContext.setUser(userInfo);
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      setError(error.code);
+    }
   };
 
   return (
@@ -39,7 +52,7 @@ function LoginScreen({ navigation }) {
       <Logo />
       <View style={styles.form}>
         <Formik
-          initialValues={{ email: "test@test.bg", password: "123456" }}
+          initialValues={{ email: "test@test.bg", password: "1123456" }}
           onSubmit={(values) => handleLogin(values)}
           validationSchema={validationSchema}
         >
@@ -78,6 +91,7 @@ function LoginScreen({ navigation }) {
               />
 
               <Button
+                disabled={loading}
                 styleObject={{
                   loginBtn: styles.loginBtn,
                   loginBtnText: styles.loginBtnText,
@@ -90,11 +104,19 @@ function LoginScreen({ navigation }) {
           )}
         </Formik>
       </View>
+      {error && <Error error={error} />}
+
+      {loading && (
+        <View style={styles.animation}>
+          <Loader visible={loading} />
+        </View>
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  animation: { width: 250, height: 130 },
   container: {
     flex: 1,
     paddingTop: Constants.statusBarHeight,
