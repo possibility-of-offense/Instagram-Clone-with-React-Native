@@ -9,7 +9,6 @@ import { useNetInfo } from "@react-native-community/netinfo";
 // Own Dependencies
 import AppInput from "../components/UI/Input";
 import { auth } from "../firebase/config";
-import { AuthContext } from "../context/AuthContext";
 import Button from "../components/UI/Button";
 import colors from "../themes/colors";
 import Logo from "../components/Logo/Logo";
@@ -28,7 +27,6 @@ const validationSchema = Yup.object().shape({
 function LoginScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const authContext = useContext(AuthContext);
 
   const netInfo = useNetInfo();
 
@@ -45,7 +43,6 @@ function LoginScreen({ navigation }) {
         values.password
       );
 
-      authContext.setUser(userInfo);
       setLoading(false);
     } catch (error) {
       setLoading(false);
@@ -58,7 +55,7 @@ function LoginScreen({ navigation }) {
       <Logo />
       <View style={styles.form}>
         <Formik
-          initialValues={{ email: "test@test.bg", password: "1123456" }}
+          initialValues={{ email: "test@test.bg", password: "123456" }}
           onSubmit={(values) => handleLogin(values)}
           validationSchema={validationSchema}
         >
