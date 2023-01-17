@@ -4,7 +4,7 @@ import { StyleSheet } from "react-native";
 // Own Dependencies
 import colors from "../themes/colors";
 import FollowersScreen from "../screens/FollowersScreen";
-import UserPostsScreen from "../screens/UserPostsScreen";
+import UserProfileScreen from "../screens/UserProfileScreen";
 import PostDetailsScreen from "../screens/PostDetailsScreen";
 import ProfileHeader from "../components/UI/Header/ProfileHeader";
 
@@ -18,7 +18,7 @@ const ProfileNavigator = () => {
         initialRouteName: "Posts",
       }}
     >
-      <Stack.Screen component={UserPostsScreen} name="Posts" />
+      <Stack.Screen component={UserProfileScreen} name="Posts" />
       <Stack.Screen component={FollowersScreen} name="Followers" />
       <Stack.Screen component={PostDetailsScreen} name="Post Details" />
     </Stack.Navigator>

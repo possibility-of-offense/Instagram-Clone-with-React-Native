@@ -9,7 +9,7 @@ import colors from "../themes/colors";
 import useApi from "../api/useApi";
 import UserProfileTab from "../components/UI/Tab/UserProfileTab";
 
-function UserPostsScreen({ navigation }) {
+function UserProfileScreen({ navigation }) {
   const { user } = useContext(AuthContext);
 
   const { data: posts, setData } = useApi({
@@ -29,10 +29,17 @@ function UserPostsScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <View style={styles.userInfoContainer}>
-        <Image
-          source={require("../assets/images/person.jpg")}
-          style={styles.userInfoImage}
-        />
+        {user.photoUrl ? (
+          <Image
+            source={require("../assets/images/person.jpg")}
+            style={styles.userInfoImage}
+          />
+        ) : (
+          <Image
+            source={require("../assets/images/person.jpg")}
+            style={styles.userInfoImage}
+          />
+        )}
         <View style={styles.userInfoNameContainer}>
           <Text style={styles.userInfoName}>
             {user.email || user.displayName}
@@ -45,13 +52,7 @@ function UserPostsScreen({ navigation }) {
       </View>
       <View style={styles.postGridContainer}>
         <View style={styles.tabs}>
-          <UserProfileTab
-            onPress={() => {
-              navigation.navigate("Posts");
-            }}
-            title={userInfo?.posts}
-            subTitle="Posts"
-          />
+          <UserProfileTab title={userInfo?.posts} subTitle="Posts" />
           <UserProfileTab
             onPress={() => {
               navigation.navigate("Followers");
@@ -148,4 +149,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default UserPostsScreen;
+export default UserProfileScreen;

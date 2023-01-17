@@ -1,5 +1,12 @@
 import React, { useContext, useState } from "react";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  doc,
+  increment,
+  serverTimestamp,
+  updateDoc,
+} from "firebase/firestore";
 import { Image, View, StyleSheet, TouchableOpacity } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -72,7 +79,7 @@ function AddPostScreen(props) {
       uploadBytes(userPostImageRef, blob).then((snapshot) => {
         getDownloadURL(userPostImageRef)
           .then((url) => {
-            addDoc(collection(db, "posts"), {
+            return addDoc(collection(db, "posts"), {
               user: {
                 userId: user.uid,
                 userName: user.email,
@@ -87,14 +94,20 @@ function AddPostScreen(props) {
               popular: false,
             })
               .then((data) => {
-                setDescription(null);
-                setImage(null);
-                setLoading(false);
-                props.navigation.navigate("Home");
+                updateDoc(doc(db, "users", user.uid), {
+                  posts: increment(1),
+                })
+                  .then(() => {
+                    setDescription(null);
+                    setImage(null);
+                    setLoading(false);
+                    props.navigation.navigate("Home");
+                  })
+                  .catch((err) => setError(`Couldn't add document!`));
               })
               .catch((err) => setError(`Couldn't add document!`));
           })
-          .catch((err) => setError(`Couldn't get image url!`));
+          .catch((err) => setError(`Couldn't upload image!`));
       });
     } catch (error) {
       setError(`Couldn't upload image!`);
