@@ -1,12 +1,12 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { StyleSheet, Text, View } from "react-native";
-import { AntDesign } from "@expo/vector-icons";
+import { StyleSheet } from "react-native";
 
 // Own Dependencies
 import colors from "../themes/colors";
 import FollowersScreen from "../screens/FollowersScreen";
 import UserPostsScreen from "../screens/UserPostsScreen";
 import PostDetailsScreen from "../screens/PostDetailsScreen";
+import ProfileHeader from "../components/UI/Header/ProfileHeader";
 
 const Stack = createNativeStackNavigator();
 
@@ -14,19 +14,7 @@ const ProfileNavigator = () => {
   return (
     <Stack.Navigator
       screenOptions={{
-        header: (props) => {
-          return (
-            <View style={styles.header}>
-              <AntDesign
-                name="leftcircle"
-                size={24}
-                color="black"
-                onPress={() => props.navigation.goBack()}
-              />
-              <Text>{props.route.name}</Text>
-            </View>
-          );
-        },
+        header: ProfileHeader,
         initialRouteName: "Posts",
       }}
     >
@@ -48,12 +36,6 @@ const styles = StyleSheet.create({
   },
   btnText: {
     color: colors.dark,
-  },
-  header: {
-    justifyContent: "center",
-    height: 100,
-    paddingLeft: 15,
-    paddingTop: 40,
   },
   userInfoContainer: {
     flexDirection: "row",
