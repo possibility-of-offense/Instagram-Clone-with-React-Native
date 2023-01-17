@@ -11,6 +11,7 @@ import AddPostScreen from "../screens/AddPostScreen";
 import HomeScreen from "../screens/HomeScreen";
 import colors from "../themes/colors";
 import TabItem from "../components/UI/Tab/TabItem";
+import ProfileScreen from "../screens/ProfileScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -53,7 +54,25 @@ const AppNavigator = () => {
             "post-add",
             "Add Post",
             "Add Post",
-            "material-design",
+            "material-design"
+          ),
+        }}
+      />
+      <Tab.Screen
+        component={ProfileScreen}
+        name="Profile"
+        listeners={({ route }) => ({
+          focus: () => {
+            setCurrentRoute(route.name);
+          },
+        })}
+        options={{
+          ...TabItem(
+            currentRoute,
+            "user",
+            "Profile",
+            "Profile",
+            "entypo",
             true
           ),
         }}

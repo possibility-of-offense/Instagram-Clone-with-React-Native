@@ -1,9 +1,15 @@
-import { collection, onSnapshot, query } from "firebase/firestore";
+import {
+  collection,
+  orderBy,
+  onSnapshot,
+  query,
+  where,
+} from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { db } from "../firebase/config";
 
 const useApi = (options = {}) => {
-  const { type, name, realTime } = options;
+  const { type, name, realTime, queryFilter } = options;
 
   const [data, setData] = useState(null);
   const [error, setError] = useState(false);
@@ -19,16 +25,33 @@ const useApi = (options = {}) => {
           // one document
           // multiple documents
           if (type === "documents") {
-            unsubscribe = onSnapshot(
-              query(collection(db, name)),
-              (snapshot) => {
-                const queryData = snapshot.docs.map((doc) => ({
-                  id: doc.id,
-                  ...doc.data(),
-                }));
-                setData(queryData);
-              }
-            );
+            if (queryFilter) {
+              unsubscribe = onSnapshot(
+                query(
+                  collection(db, name),
+                  where(...queryFilter),
+                  orderBy("timestamp", "desc")
+                ),
+                (snapshot) => {
+                  const queryData = snapshot.docs.map((doc) => ({
+                    id: doc.id,
+                    ...doc.data(),
+                  }));
+                  setData(queryData);
+                }
+              );
+            } else {
+              unsubscribe = onSnapshot(
+                query(collection(db, name)),
+                (snapshot) => {
+                  const queryData = snapshot.docs.map((doc) => ({
+                    id: doc.id,
+                    ...doc.data(),
+                  }));
+                  setData(queryData);
+                }
+              );
+            }
           } else if (type === "document") {
           }
         }

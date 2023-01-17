@@ -5,40 +5,20 @@ import { Dimensions } from "react-native";
 
 // Own Dependecies
 import colors from "../themes/colors";
-import { db } from "../firebase/config";
 import useApi from "../api/useApi";
 
-function getEveryNth(arr, nth) {
-  const result = [];
-
-  for (let index = 0; index < arr.length; index += nth) {
-    result.push(arr[index]);
-  }
-
-  return result;
-}
-
 function HomeScreen(props) {
-  const q = query(collection(db, "posts"));
-
-  // const unsubscribe = onSnapshot(q, (querySnapshot) => {
-  //   const cities = [];
-  //   querySnapshot.forEach((doc) => {
-  //     cities.push(doc.data().description);
-  //   });
-  //   console.log("Current cities in CA: ", cities.join(", "));
+  // const { data, setData } = useApi({
+  //   type: "documents",
+  //   name: "posts",
+  //   realTime: true,
   // });
-  const { data, setData } = useApi({
-    type: "documents",
-    name: "posts",
-    realTime: true,
-  });
 
   return (
     <View style={styles.container}>
       <Text>Home</Text>
       <View style={styles.postGridContainer}>
-        <View style={styles.postGrid}>
+        {/* <View style={styles.postGrid}>
           {data &&
             Array.isArray(data) &&
             data.length > 0 &&
@@ -50,7 +30,7 @@ function HomeScreen(props) {
                 />
               </View>
             ))}
-        </View>
+        </View> */}
       </View>
     </View>
   );
