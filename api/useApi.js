@@ -4,12 +4,15 @@ import {
   onSnapshot,
   query,
   where,
+  getDocs,
+  getDoc,
+  doc,
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { db } from "../firebase/config";
 
 const useApi = (options = {}) => {
-  const { type, name, realTime, queryFilter } = options;
+  const { id, type, name, realTime, queryFilter } = options;
 
   const [data, setData] = useState(null);
   const [error, setError] = useState(false);
@@ -57,6 +60,11 @@ const useApi = (options = {}) => {
         }
         // One time fetching
         else {
+          if (type === "documents") {
+          } else if (type === "document") {
+            const document = await getDoc(doc(db, name, id.trim()));
+            setData(document.data());
+          }
         }
       } catch (error) {
         setError(error);
@@ -64,7 +72,7 @@ const useApi = (options = {}) => {
     };
     request();
 
-    return () => unsubscribe();
+    return () => typeof unsubscribe === "function" && unsubscribe();
   }, []);
 
   return {

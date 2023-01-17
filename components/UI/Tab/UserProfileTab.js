@@ -1,18 +1,21 @@
 import React from "react";
-import {
-  StyleSheet,
-  Text,
-  TouchableHighlight,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+
+// Own Dependencies
 import colors from "../../../themes/colors";
+import Loader from "../../UI/Loader";
 
 function UserProfileTab({ onPress, title, subTitle }) {
   return (
     <TouchableOpacity onPress={onPress} style={styles.container}>
-      <Text style={styles.title}>{title}</Text>
-      <Text style={styles.subTitle}>{subTitle}</Text>
+      {title || title === 0 ? (
+        <>
+          <Text style={styles.title}>{title}</Text>
+          <Text style={styles.subTitle}>{subTitle}</Text>
+        </>
+      ) : (
+        <Loader visible={true} />
+      )}
     </TouchableOpacity>
   );
 }

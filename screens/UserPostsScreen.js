@@ -12,11 +12,18 @@ import UserProfileTab from "../components/UI/Tab/UserProfileTab";
 function UserPostsScreen({ navigation }) {
   const { user } = useContext(AuthContext);
 
-  const { data, setData } = useApi({
+  const { data: posts, setData } = useApi({
     type: "documents",
     name: "posts",
     realTime: true,
     queryFilter: ["user.userId", "==", user.uid],
+  });
+
+  const { data: userInfo } = useApi({
+    type: "document",
+    name: "users",
+    realTime: false,
+    id: user.uid,
   });
 
   return (
@@ -42,29 +49,29 @@ function UserPostsScreen({ navigation }) {
             onPress={() => {
               navigation.navigate("Posts");
             }}
-            title="26"
+            title={userInfo?.posts}
             subTitle="Posts"
           />
           <UserProfileTab
             onPress={() => {
               navigation.navigate("Followers");
             }}
-            title="316"
+            title={userInfo?.followers}
             subTitle="Followers"
           />
           <UserProfileTab
             onPress={() => {
               navigation.navigate("Followers");
             }}
-            title="200"
+            title={userInfo?.following}
             subTitle="Following"
           />
         </View>
         <View style={styles.postGrid}>
-          {data &&
-            Array.isArray(data) &&
-            data.length > 0 &&
-            data.map((el, i) => (
+          {posts &&
+            Array.isArray(posts) &&
+            posts.length > 0 &&
+            posts.map((el, i) => (
               <TouchableOpacity
                 key={el.id}
                 onPress={() =>
@@ -99,7 +106,7 @@ const styles = StyleSheet.create({
   },
   postGridContainer: {
     alignItems: "center",
-    borderTopColor: colors.grey,
+    borderTopColor: colors.lightGrey,
     borderTopWidth: 0.4,
     justifyContent: "center",
   },
