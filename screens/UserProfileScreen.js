@@ -1,5 +1,12 @@
 import React, { useContext } from "react";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { Dimensions } from "react-native";
 
 // Own Dependecies
@@ -9,8 +16,14 @@ import colors from "../themes/colors";
 import useApi from "../api/useApi";
 import UserProfileTab from "../components/UI/Tab/UserProfileTab";
 
-function UserProfileScreen({ navigation }) {
+function UserProfileScreen({ navigation, route }) {
   const { user } = useContext(AuthContext);
+  let postAdded;
+  if (route.params && route.params.postAdded) {
+    postAdded = true;
+  } else {
+    postAdded = undefined;
+  }
 
   const { data: posts, setData } = useApi({
     type: "documents",
@@ -22,72 +35,78 @@ function UserProfileScreen({ navigation }) {
   const { data: userInfo } = useApi({
     type: "document",
     name: "users",
-    realTime: false,
+    realTime: true,
     id: user.uid,
   });
 
   return (
-    <View style={styles.container}>
-      <View style={styles.userInfoContainer}>
-        {user.photoUrl ? (
-          <Image
-            source={require("../assets/images/person.jpg")}
-            style={styles.userInfoImage}
-          />
-        ) : (
-          <Image
-            source={require("../assets/images/person.jpg")}
-            style={styles.userInfoImage}
-          />
-        )}
-        <View style={styles.userInfoNameContainer}>
-          <Text style={styles.userInfoName}>
-            {user.email || user.displayName}
-          </Text>
-          <Button
-            styleObject={{ btn: styles.btn, btnText: styles.btnText }}
-            title="Edit Profile"
-          />
+    <ScrollView>
+      <View style={styles.container}>
+        <View style={styles.userInfoContainer}>
+          {user.photoUrl ? (
+            <Image
+              source={require("../assets/images/person.jpg")}
+              style={styles.userInfoImage}
+            />
+          ) : (
+            <Image
+              source={require("../assets/images/person.jpg")}
+              style={styles.userInfoImage}
+            />
+          )}
+          <View style={styles.userInfoNameContainer}>
+            <Text style={styles.userInfoName}>
+              {user.email || user.displayName}
+            </Text>
+            <Button
+              styleObject={{ btn: styles.btn, btnText: styles.btnText }}
+              title="Edit Profile"
+            />
+          </View>
+        </View>
+        <View style={styles.postGridContainer}>
+          <View style={styles.tabs}>
+            <UserProfileTab
+              title={postAdded ? userInfo?.posts + 1 : userInfo?.posts}
+              subTitle="Posts"
+            />
+            <UserProfileTab
+              onPress={() => {
+                navigation.navigate("Followers");
+              }}
+              title={userInfo?.followers}
+              subTitle="Followers"
+            />
+            <UserProfileTab
+              onPress={() => {
+                navigation.navigate("Followers");
+              }}
+              title={userInfo?.following}
+              subTitle="Following"
+            />
+          </View>
+
+          <View style={styles.postGrid}>
+            {posts &&
+              Array.isArray(posts) &&
+              posts.length > 0 &&
+              posts.map((el, i) => (
+                <TouchableOpacity
+                  key={el.id}
+                  onPress={() =>
+                    navigation.navigate("Post Details", { id: el.id })
+                  }
+                >
+                  <Image
+                    source={{ uri: el.image }}
+                    style={[styles.postGridImage]}
+                  />
+                </TouchableOpacity>
+              ))}
+          </View>
         </View>
       </View>
-      <View style={styles.postGridContainer}>
-        <View style={styles.tabs}>
-          <UserProfileTab title={userInfo?.posts} subTitle="Posts" />
-          <UserProfileTab
-            onPress={() => {
-              navigation.navigate("Followers");
-            }}
-            title={userInfo?.followers}
-            subTitle="Followers"
-          />
-          <UserProfileTab
-            onPress={() => {
-              navigation.navigate("Followers");
-            }}
-            title={userInfo?.following}
-            subTitle="Following"
-          />
-        </View>
-        <View style={styles.postGrid}>
-          {posts &&
-            Array.isArray(posts) &&
-            posts.length > 0 &&
-            posts.map((el, i) => (
-              <TouchableOpacity
-                key={el.id}
-                onPress={() =>
-                  navigation.navigate("Post Details", { id: el.id })
-                }
-              >
-                <Image
-                  source={{ uri: el.image }}
-                  style={[styles.postGridImage]}
-                />
-              </TouchableOpacity>
-            ))}
-        </View>
-      </View>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -114,7 +133,6 @@ const styles = StyleSheet.create({
   postGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    paddingVertical: 15,
   },
   postGridImage: {
     alignSelf: "flex-start",
@@ -124,10 +142,9 @@ const styles = StyleSheet.create({
     height: 140,
   },
   tabs: {
-    borderBottomColor: colors.grey,
-    borderBottomWidth: 0.4,
     flexDirection: "row",
     padding: 10,
+    paddingBottom: 15,
   },
   userInfoContainer: {
     flexDirection: "row",

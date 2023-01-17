@@ -56,6 +56,10 @@ const useApi = (options = {}) => {
               );
             }
           } else if (type === "document") {
+            unsubscribe = onSnapshot(doc(db, "users", id), (snapshot) => {
+              const documentData = snapshot.data();
+              setData(documentData);
+            });
           }
         }
         // One time fetching

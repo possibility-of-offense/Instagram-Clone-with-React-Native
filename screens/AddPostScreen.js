@@ -101,7 +101,10 @@ function AddPostScreen(props) {
                     setDescription(null);
                     setImage(null);
                     setLoading(false);
-                    props.navigation.navigate("Home");
+                    props.navigation.navigate("Profile", {
+                      screen: "Posts",
+                      postAdded: true,
+                    });
                   })
                   .catch((err) => setError(`Couldn't add document!`));
               })

@@ -40,7 +40,11 @@ function PostDetailsScreen(props) {
     const fetching = async () => {
       try {
         const findById = await getDocs(
-          query(collection(db, "likes"), where("userId", "==", user.uid))
+          query(
+            collection(db, "likes"),
+            where("userId", "==", user.uid),
+            where("postId", "==", props.route.params.id)
+          )
         );
 
         if (findById.docs.length > 0) {
@@ -65,6 +69,7 @@ function PostDetailsScreen(props) {
         image: user.photoUrl || null,
         postId: props.route.params.id,
       });
+      setIsLiked(true);
     } catch (error) {
       console.log(error);
     }
