@@ -1,17 +1,15 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Constants from "expo-constants";
-import { Entypo } from "@expo/vector-icons";
-import { MaterialIcons } from "@expo/vector-icons";
-import { View, StyleSheet, Text } from "react-native";
+import { View, StyleSheet } from "react-native";
 import Logo from "../components/Logo/Logo";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 // Own Dependencies
 import AddPostScreen from "../screens/AddPostScreen";
 import HomeScreen from "../screens/HomeScreen";
 import colors from "../themes/colors";
-import TabItem from "../components/UI/Tab/TabItem";
-import ProfileScreen from "../screens/ProfileScreen";
+import BottomTabItem from "../components/UI/Tab/BottomTabItem";
+import ProfileNavigator from "./ProfileNavigator";
 
 const Tab = createBottomTabNavigator();
 
@@ -21,11 +19,15 @@ const AppNavigator = () => {
   return (
     <Tab.Navigator
       screenOptions={{
-        header: () => (
-          <View style={styles.header}>
-            <Logo width="100" height="30" styles={styles.logo} />
-          </View>
-        ),
+        header: (props) => {
+          if (props.route.name !== "Profile") {
+            return (
+              <View style={styles.header}>
+                <Logo width="100" height="30" styles={styles.logo} />
+              </View>
+            );
+          }
+        },
       }}
     >
       <Tab.Screen
@@ -37,7 +39,7 @@ const AppNavigator = () => {
           },
         })}
         options={{
-          ...TabItem(currentRoute, "home", "Home", "Home", "entypo"),
+          ...BottomTabItem(currentRoute, "home", "Home", "Home", "entypo"),
         }}
       />
       <Tab.Screen
@@ -49,7 +51,7 @@ const AppNavigator = () => {
           },
         })}
         options={{
-          ...TabItem(
+          ...BottomTabItem(
             currentRoute,
             "post-add",
             "Add Post",
@@ -59,7 +61,7 @@ const AppNavigator = () => {
         }}
       />
       <Tab.Screen
-        component={ProfileScreen}
+        component={ProfileNavigator}
         name="Profile"
         listeners={({ route }) => ({
           focus: () => {
@@ -67,7 +69,7 @@ const AppNavigator = () => {
           },
         })}
         options={{
-          ...TabItem(
+          ...BottomTabItem(
             currentRoute,
             "user",
             "Profile",

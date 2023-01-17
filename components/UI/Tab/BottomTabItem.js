@@ -5,7 +5,7 @@ import { Text } from "react-native";
 // Own Dependecies
 import colors from "../../../themes/colors";
 
-const TabItem = (currentRoute, icon, route, text, type, last = false) => {
+const BottomTabItem = (currentRoute, icon, route, text, type, last = false) => {
   return {
     tabBarIcon: ({ color, size, focused }) => {
       return type === "entypo" ? (
@@ -39,4 +39,4 @@ const TabItem = (currentRoute, icon, route, text, type, last = false) => {
   };
 };
 
-export default TabItem;
+export default BottomTabItem;

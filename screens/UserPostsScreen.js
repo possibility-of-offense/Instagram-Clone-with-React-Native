@@ -1,6 +1,5 @@
 import React, { useContext } from "react";
-import { Image, StyleSheet, Text, View } from "react-native";
-import { collection, query, onSnapshot } from "firebase/firestore";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Dimensions } from "react-native";
 
 // Own Dependecies
@@ -8,8 +7,9 @@ import { AuthContext } from "../context/AuthContext";
 import Button from "../components/UI/Button";
 import colors from "../themes/colors";
 import useApi from "../api/useApi";
+import UserProfileTab from "../components/UI/Tab/UserProfileTab";
 
-function ProfileScreen(props) {
+function UserPostsScreen({ navigation }) {
   const { user } = useContext(AuthContext);
 
   const { data, setData } = useApi({
@@ -18,8 +18,6 @@ function ProfileScreen(props) {
     realTime: true,
     queryFilter: ["user.userId", "==", user.uid],
   });
-
-  console.log(data);
 
   return (
     <View style={styles.container}>
@@ -39,17 +37,45 @@ function ProfileScreen(props) {
         </View>
       </View>
       <View style={styles.postGridContainer}>
+        <View style={styles.tabs}>
+          <UserProfileTab
+            onPress={() => {
+              navigation.navigate("Posts");
+            }}
+            title="26"
+            subTitle="Posts"
+          />
+          <UserProfileTab
+            onPress={() => {
+              navigation.navigate("Followers");
+            }}
+            title="316"
+            subTitle="Followers"
+          />
+          <UserProfileTab
+            onPress={() => {
+              navigation.navigate("Followers");
+            }}
+            title="200"
+            subTitle="Following"
+          />
+        </View>
         <View style={styles.postGrid}>
           {data &&
             Array.isArray(data) &&
             data.length > 0 &&
             data.map((el, i) => (
-              <View key={el.id}>
+              <TouchableOpacity
+                key={el.id}
+                onPress={() =>
+                  navigation.navigate("Post Details", { id: el.id })
+                }
+              >
                 <Image
                   source={{ uri: el.image }}
                   style={[styles.postGridImage]}
                 />
-              </View>
+              </TouchableOpacity>
             ))}
         </View>
       </View>
@@ -61,22 +87,23 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: colors.white,
     flex: 1,
+    justifyContent: "flex-start",
   },
   btn: {
     backgroundColor: colors.grey,
     marginTop: 15,
-    width: 200,
+    flex: 1,
   },
   btnText: {
     color: colors.dark,
   },
   postGridContainer: {
     alignItems: "center",
+    borderTopColor: colors.grey,
+    borderTopWidth: 0.4,
     justifyContent: "center",
   },
   postGrid: {
-    borderTopColor: colors.grey,
-    borderTopWidth: 0.4,
     flexDirection: "row",
     flexWrap: "wrap",
     paddingVertical: 15,
@@ -88,6 +115,12 @@ const styles = StyleSheet.create({
     width: Dimensions.get("window").width * 0.333,
     height: 140,
   },
+  tabs: {
+    borderBottomColor: colors.grey,
+    borderBottomWidth: 0.4,
+    flexDirection: "row",
+    padding: 10,
+  },
   userInfoContainer: {
     flexDirection: "row",
     padding: 25,
@@ -98,12 +131,14 @@ const styles = StyleSheet.create({
     width: 80,
   },
   userInfoNameContainer: {
-    marginLeft: 20,
+    flex: 1,
+    marginLeft: 30,
     marginTop: 10,
+    marginRight: 5,
   },
   userInfoName: {
     fontSize: 18,
   },
 });
 
-export default ProfileScreen;
+export default UserPostsScreen;
