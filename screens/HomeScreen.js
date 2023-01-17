@@ -1,11 +1,57 @@
 import React from "react";
-import { View, StyleSheet, Text } from "react-native";
+import { Image, StyleSheet, Text, View } from "react-native";
+import { collection, query, onSnapshot } from "firebase/firestore";
+import { Dimensions } from "react-native";
+
+// Own Dependecies
 import colors from "../themes/colors";
+import { db } from "../firebase/config";
+import useApi from "../api/useApi";
+
+function getEveryNth(arr, nth) {
+  const result = [];
+
+  for (let index = 0; index < arr.length; index += nth) {
+    result.push(arr[index]);
+  }
+
+  return result;
+}
 
 function HomeScreen(props) {
+  const q = query(collection(db, "posts"));
+
+  // const unsubscribe = onSnapshot(q, (querySnapshot) => {
+  //   const cities = [];
+  //   querySnapshot.forEach((doc) => {
+  //     cities.push(doc.data().description);
+  //   });
+  //   console.log("Current cities in CA: ", cities.join(", "));
+  // });
+  const { data, setData } = useApi({
+    type: "documents",
+    name: "posts",
+    realTime: true,
+  });
+
   return (
     <View style={styles.container}>
       <Text>Home</Text>
+      <View style={styles.postGridContainer}>
+        <View style={styles.postGrid}>
+          {data &&
+            Array.isArray(data) &&
+            data.length > 0 &&
+            data.map((el, i) => (
+              <View key={el.id}>
+                <Image
+                  source={{ uri: el.image }}
+                  style={[styles.postGridImage]}
+                />
+              </View>
+            ))}
+        </View>
+      </View>
     </View>
   );
 }
@@ -14,7 +60,24 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: colors.white,
     flex: 1,
-    padding: 15,
+  },
+  postGridContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  postGrid: {
+    borderTopColor: colors.grey,
+    borderTopWidth: 0.4,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    paddingVertical: 15,
+  },
+  postGridImage: {
+    alignSelf: "flex-start",
+    borderColor: colors.white,
+    borderWidth: 2,
+    width: Dimensions.get("window").width * 0.333,
+    height: 140,
   },
 });
 
