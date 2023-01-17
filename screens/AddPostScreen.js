@@ -1,21 +1,33 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { Image, View, StyleSheet, TouchableOpacity } from "react-native";
+import { FontAwesome } from "@expo/vector-icons";
 import { MaterialIcons } from "@expo/vector-icons";
+import "react-native-get-random-values";
+import { nanoid } from "nanoid";
 import { useIsFocused } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
 // Own Dependencies
+
+import { AuthContext } from "../context/AuthContext";
+import AppInput from "../components/UI/Input";
 import Button from "../components/UI/Button";
 import colors from "../themes/colors";
-import AppInput from "../components/UI/Input";
-import { ref, uploadBytes, uploadString } from "firebase/storage";
-import { storage } from "../firebase/config";
+import { db, storage } from "../firebase/config";
+import Error from "../components/UI/Error";
+import Loader from "../components/UI/Loader";
 
 function AddPostScreen(props) {
   const isFocused = useIsFocused();
 
   const [image, setImage] = useState(null);
   const [description, setDescription] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
+
+  const { user } = useContext(AuthContext);
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -30,15 +42,19 @@ function AddPostScreen(props) {
     }
   };
 
-  // Handle publish post
+  // // Handle publish post
   const handlePost = async () => {
+    const id = await nanoid();
+
+    if (!image || description === "") {
+      setError("Fill the inputs first!");
+      return;
+    }
+
+    setLoading(true);
+
     try {
-      // const storageRef = ref(storage, "test");
-      // uploadBytes(storageRef, image, {
-      //   contentType: "image/jpg",
-      // }).then((snap) => {
-      //   console.log(snap);
-      // });
+      let userPostImageRef;
 
       const blob = await new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest();
@@ -52,47 +68,89 @@ function AddPostScreen(props) {
         xhr.open("GET", image, true);
         xhr.send(null);
       });
-      const thisUsersNewPostRef = ref(storage, "users/img1");
-
-      uploadBytes(thisUsersNewPostRef, blob).then((snapshot) => {
-        // causes crash
-        console.log("Uploaded a blob or file!");
+      userPostImageRef = ref(storage, `users/${user.uid}/${id}/postImage`);
+      uploadBytes(userPostImageRef, blob).then((snapshot) => {
+        getDownloadURL(userPostImageRef)
+          .then((url) => {
+            addDoc(collection(db, "posts"), {
+              user: {
+                userId: user.uid,
+                userName: user.email,
+                name: null,
+                image: null,
+              },
+              description,
+              image: url,
+              timestamp: serverTimestamp(),
+              likes: 0,
+              comments: 0,
+              popular: false,
+            })
+              .then((data) => {
+                setDescription(null);
+                setImage(null);
+                setLoading(false);
+                props.navigation.navigate("Home");
+              })
+              .catch((err) => setError(`Couldn't add document!`));
+          })
+          .catch((err) => setError(`Couldn't get image url!`));
       });
     } catch (error) {
-      console.log(error);
+      setError(`Couldn't upload image!`);
     }
   };
 
   return (
     <View style={styles.container}>
-      <View style={styles.addPostContainer}>
-        <Image
-          source={require("../assets/images/person.jpg")}
-          style={styles.personImage}
-        />
-        <View style={styles.textInputContainer}>
-          <AppInput
-            multiline={true}
-            onChange={setDescription}
-            styleObj={styles.textInput}
-            toFocus={isFocused}
+      {!loading && (
+        <>
+          <View style={styles.addPostContainer}>
+            <Image
+              source={require("../assets/images/person.jpg")}
+              style={styles.personImage}
+            />
+            <View style={styles.textInputContainer}>
+              <AppInput
+                multiline={true}
+                onChange={setDescription}
+                styleObj={styles.textInput}
+                toFocus={isFocused}
+                value={description}
+              />
+              {image ? (
+                <View style={styles.imageContainer}>
+                  <Image style={styles.image} source={{ uri: image }} />
+                  <TouchableOpacity onPress={() => setImage(null)}>
+                    <FontAwesome name="remove" size={24} color={colors.dark} />
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <TouchableOpacity onPress={pickImage}>
+                  <MaterialIcons
+                    name="add-a-photo"
+                    size={32}
+                    color={colors.dark}
+                  />
+                </TouchableOpacity>
+              )}
+            </View>
+          </View>
+          <Button
+            disabled={loading}
+            onPress={handlePost}
+            title="Post"
+            styleObject={{ btn: styles.btn, btnText: styles.btnText }}
+            underlayColor={colors.primaryWithoutOpacity}
           />
-          {image ? (
-            <Image style={styles.image} source={{ uri: image }} />
-          ) : (
-            <TouchableOpacity onPress={pickImage}>
-              <MaterialIcons name="add-a-photo" size={32} color="black" />
-            </TouchableOpacity>
-          )}
-        </View>
+        </>
+      )}
+      {loading && <Loader visible={loading} />}
+      <View style={styles.errorContainer}>
+        {!loading && error && (
+          <Error error={error} styleObj={styles.errorText} />
+        )}
       </View>
-      <Button
-        disabled={false}
-        onPress={handlePost}
-        title="Post"
-        styleObject={{ btn: styles.btn, btnText: styles.btnText }}
-        underlayColor={colors.primaryWithoutOpacity}
-      />
     </View>
   );
 }
@@ -116,7 +174,21 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  image: { width: 60, height: 60 },
+  errorContainer: {
+    paddingVertical: 10,
+    textAlign: "center",
+    alignItems: "center",
+  },
+  errorText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    letterSpacing: 1,
+  },
+  image: { width: 60, height: 60, marginRight: 6 },
+  imageContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
   personImage: {
     borderRadius: 20,
     height: 40,

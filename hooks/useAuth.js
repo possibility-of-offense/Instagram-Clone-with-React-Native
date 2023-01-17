@@ -13,7 +13,7 @@ export const useAuth = () => {
       if (user) {
         setUser(user);
       } else {
-        setUser(`User sign out!`);
+        setUser(null);
       }
       setAuthStateFetching(false);
     });

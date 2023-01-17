@@ -16,10 +16,10 @@ const AppInput = ({
   // TODO focus on if the parent tab is focused!!!
   useEffect(() => {
     if (toFocus) {
-      inputRef.current.focus();
+      inputRef.current?.focus();
     }
 
-    return () => inputRef.current.blur();
+    return () => inputRef.current?.blur();
   }, [toFocus]);
 
   return (

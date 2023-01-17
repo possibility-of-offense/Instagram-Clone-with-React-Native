@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
-function Error({ error }) {
+function Error({ error, styleObj = {} }) {
   const [msg, setMsg] = useState("");
 
   useEffect(() => {
@@ -25,7 +25,7 @@ function Error({ error }) {
 
   return (
     <View>
-      <Text style={styles.text}>{msg}</Text>
+      <Text style={[styles.text, styleObj]}>{msg}</Text>
     </View>
   );
 }
