@@ -140,6 +140,7 @@ function UserProfileScreen({ navigation, route }) {
                       btnText: styles.checkAllBtnText,
                     }}
                     title="Check All Posts"
+                    underlayColor={colors.primaryWithoutOpacity}
                   />
                 </View>
               )}

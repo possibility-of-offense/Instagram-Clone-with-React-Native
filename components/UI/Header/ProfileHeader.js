@@ -8,12 +8,14 @@ import colors from "../../../themes/colors";
 function ProfileHeader(props) {
   return (
     <View style={styles.container}>
-      <AntDesign
-        name="leftcircle"
-        size={34}
-        color={colors.primary}
-        onPress={() => props.navigation.goBack()}
-      />
+      {props.route.name !== "Profile Info" && (
+        <AntDesign
+          name="leftcircle"
+          size={34}
+          color={colors.primary}
+          onPress={() => props.navigation.goBack()}
+        />
+      )}
       <Text style={styles.text}>{props.route.name}</Text>
     </View>
   );
