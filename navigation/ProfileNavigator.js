@@ -4,9 +4,12 @@ import { StyleSheet } from "react-native";
 // Own Dependencies
 import colors from "../themes/colors";
 import FollowersScreen from "../screens/FollowersScreen";
+import FollowingScreen from "../screens/FollowingScreen";
 import UserProfileScreen from "../screens/UserProfileScreen";
 import PostDetailsScreen from "../screens/PostDetailsScreen";
 import ProfileHeader from "../components/UI/Header/ProfileHeader";
+import PostsScreen from "../screens/PostsScreen";
+import EditUserInfoScreen from "../screens/EditUserInfoScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -15,11 +18,14 @@ const ProfileNavigator = () => {
     <Stack.Navigator
       screenOptions={{
         header: ProfileHeader,
-        initialRouteName: "Posts",
+        initialRouteName: "Profile Info",
       }}
     >
-      <Stack.Screen component={UserProfileScreen} name="Posts" />
+      <Stack.Screen component={UserProfileScreen} name="Profile Info" />
+      <Stack.Screen component={PostsScreen} name="All Posts" />
       <Stack.Screen component={FollowersScreen} name="Followers" />
+      <Stack.Screen component={FollowingScreen} name="Following" />
+      <Stack.Screen component={EditUserInfoScreen} name="Edit User Info" />
       <Stack.Screen component={PostDetailsScreen} name="Post Details" />
     </Stack.Navigator>
   );

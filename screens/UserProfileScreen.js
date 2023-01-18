@@ -12,7 +12,6 @@ import {
   collection,
   query,
   limit,
-  where,
   startAt,
   orderBy,
   onSnapshot,
@@ -46,14 +45,11 @@ function UserProfileScreen({ navigation, route }) {
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    // REFACTOR add error handling
-
     const fetching = async () => {
       setLoading(true);
       try {
         const q = query(
-          collection(db, "posts"),
-          where("user.userId", "==", user?.uid.trim()),
+          collection(db, "users", user.uid, "posts"),
           limit(6),
           orderBy("timestamp"),
           startAt(lastDocumentSnapshot || 0)
@@ -69,7 +65,7 @@ function UserProfileScreen({ navigation, route }) {
           setLoading(false);
         });
       } catch (error) {
-        setError("Error whilegetting posts!");
+        setError("Error while getting posts!");
         setLoading(false);
       }
     };
@@ -96,8 +92,10 @@ function UserProfileScreen({ navigation, route }) {
               {user.email || user.displayName}
             </Text>
             <Button
+              onPress={() => navigation.navigate("Edit User Info")}
               styleObject={{ btn: styles.editBtn, btnText: styles.editBtnText }}
               title="Edit Profile"
+              underlayColor={colors.lightGrey}
             />
           </View>
         </View>
@@ -110,8 +108,9 @@ function UserProfileScreen({ navigation, route }) {
             <>
               <View style={styles.tabs}>
                 <UserProfileTab
-                  title={postAdded ? userInfo?.posts + 1 : userInfo?.posts}
+                  title={postsData.length}
                   subTitle="Posts"
+                  onPress={() => navigation.navigate("All Posts")}
                 />
                 <UserProfileTab
                   onPress={() => {
@@ -122,7 +121,7 @@ function UserProfileScreen({ navigation, route }) {
                 />
                 <UserProfileTab
                   onPress={() => {
-                    navigation.navigate("Followers");
+                    navigation.navigate("Following");
                   }}
                   title={userInfo?.following}
                   subTitle="Following"
@@ -135,6 +134,7 @@ function UserProfileScreen({ navigation, route }) {
                     {defineWord("post", postsData.length)}!
                   </Text>
                   <Button
+                    onPress={() => navigation.navigate("All Posts")}
                     styleObject={{
                       btn: styles.checkAllBtn,
                       btnText: styles.checkAllBtnText,

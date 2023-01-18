@@ -10,7 +10,7 @@ import HomeScreen from "../screens/HomeScreen";
 import colors from "../themes/colors";
 import BottomTabItem from "../components/UI/Tab/BottomTabItem";
 import ProfileNavigator from "./ProfileNavigator";
-import Search from "../screens/Search";
+import SearchScreen from "../screens/SearchScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -80,7 +80,7 @@ const AppNavigator = () => {
         }}
       />
       <Tab.Screen
-        component={Search}
+        component={SearchScreen}
         name="Search"
         listeners={({ route }) => ({
           focus: () => {

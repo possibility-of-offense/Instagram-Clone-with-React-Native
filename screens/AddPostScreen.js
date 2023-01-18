@@ -80,12 +80,7 @@ function AddPostScreen(props) {
         getDownloadURL(userPostImageRef)
           .then((url) => {
             return addDoc(collection(db, "users", user.uid, "posts"), {
-              user: {
-                userId: user.uid,
-                userName: user.email,
-                name: null,
-                image: null,
-              },
+              userId: user.uid,
               description,
               image: url,
               timestamp: serverTimestamp(),
@@ -102,7 +97,7 @@ function AddPostScreen(props) {
                     setImage(null);
                     setLoading(false);
                     props.navigation.navigate("Profile", {
-                      screen: "Posts",
+                      screen: "All Posts",
                       postAdded: true,
                     });
                   })
