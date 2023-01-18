@@ -22,5 +22,6 @@ export const useAuth = () => {
   return {
     authStateFetching,
     user,
+    setUser,
   };
 };

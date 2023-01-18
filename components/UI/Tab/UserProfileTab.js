@@ -8,14 +8,10 @@ import Loader from "../../UI/Loader";
 function UserProfileTab({ onPress, title, subTitle }) {
   return (
     <TouchableOpacity onPress={onPress} style={styles.container}>
-      {title || title === 0 ? (
-        <>
-          <Text style={styles.title}>{title}</Text>
-          <Text style={styles.subTitle}>{subTitle}</Text>
-        </>
-      ) : (
-        <Loader visible={true} />
-      )}
+      <>
+        <Text style={styles.title}>{title}</Text>
+        <Text style={styles.subTitle}>{subTitle}</Text>
+      </>
     </TouchableOpacity>
   );
 }

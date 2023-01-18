@@ -7,24 +7,24 @@ import {
   serverTimestamp,
   updateDoc,
 } from "firebase/firestore";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { Image, View, StyleSheet, TouchableOpacity } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import { MaterialIcons } from "@expo/vector-icons";
 import "react-native-get-random-values";
 import { nanoid } from "nanoid";
-import { useIsFocused } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
-import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { useIsFocused } from "@react-navigation/native";
 
 // Own Dependencies
 
 import { AuthContext } from "../context/AuthContext";
 import AppInput from "../components/UI/Input";
 import Button from "../components/UI/Button";
-import colors from "../themes/colors";
-import { db, storage } from "../firebase/config";
 import Error from "../components/UI/Error";
 import Loader from "../components/UI/Loader";
+import colors from "../themes/colors";
+import { db, storage } from "../firebase/config";
 
 function AddPostScreen(props) {
   const isFocused = useIsFocused();
@@ -79,7 +79,7 @@ function AddPostScreen(props) {
       uploadBytes(userPostImageRef, blob).then((snapshot) => {
         getDownloadURL(userPostImageRef)
           .then((url) => {
-            return addDoc(collection(db, "posts"), {
+            return addDoc(collection(db, "users", user.uid, "posts"), {
               user: {
                 userId: user.uid,
                 userName: user.email,
@@ -132,6 +132,7 @@ function AddPostScreen(props) {
                 onChange={setDescription}
                 styleObj={styles.textInput}
                 toFocus={isFocused}
+                placeholder="Enter description"
                 value={description}
               />
               {image ? (

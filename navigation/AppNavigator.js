@@ -10,6 +10,7 @@ import HomeScreen from "../screens/HomeScreen";
 import colors from "../themes/colors";
 import BottomTabItem from "../components/UI/Tab/BottomTabItem";
 import ProfileNavigator from "./ProfileNavigator";
+import Search from "../screens/Search";
 
 const Tab = createBottomTabNavigator();
 
@@ -74,7 +75,25 @@ const AppNavigator = () => {
             "user",
             "Profile",
             "Profile",
-            "entypo",
+            "entypo"
+          ),
+        }}
+      />
+      <Tab.Screen
+        component={Search}
+        name="Search"
+        listeners={({ route }) => ({
+          focus: () => {
+            setCurrentRoute(route.name);
+          },
+        })}
+        options={{
+          ...BottomTabItem(
+            currentRoute,
+            "person-search",
+            "Search",
+            "Search",
+            "material-design",
             true
           ),
         }}

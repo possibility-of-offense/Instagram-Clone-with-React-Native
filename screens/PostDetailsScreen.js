@@ -12,7 +12,6 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 // Own Dependencies
 import { AuthContext } from "../context/AuthContext";
 import useApi from "../api/useApi";
-import colors from "../themes/colors";
 import {
   addDoc,
   collection,
@@ -36,6 +35,7 @@ function PostDetailsScreen(props) {
   });
 
   const [isLiked, setIsLiked] = useState(false);
+
   useEffect(() => {
     const fetching = async () => {
       try {
@@ -60,6 +60,7 @@ function PostDetailsScreen(props) {
 
   const handleLike = async () => {
     try {
+      setIsLiked(true);
       await updateDoc(doc(db, "posts", props.route.params.id), {
         likes: increment(1),
       });
@@ -69,7 +70,6 @@ function PostDetailsScreen(props) {
         image: user.photoUrl || null,
         postId: props.route.params.id,
       });
-      setIsLiked(true);
     } catch (error) {
       console.log(error);
     }
@@ -78,22 +78,6 @@ function PostDetailsScreen(props) {
   if (post) {
     return (
       <ScrollView style={styles.container}>
-        <View style={styles.userInfo}>
-          {user.photoUrl ? (
-            <Image
-              source={require("../assets/images/person.jpg")}
-              style={styles.userInfoImage}
-            />
-          ) : (
-            <Image
-              source={require("../assets/images/person.jpg")}
-              style={styles.userInfoImage}
-            />
-          )}
-          <Text style={styles.userInfoText}>
-            {user.email || user.displayName}
-          </Text>
-        </View>
         <Image source={{ uri: post.image }} style={styles.image} />
         <View style={styles.actions}>
           {!isLiked ? (
@@ -147,23 +131,6 @@ const styles = StyleSheet.create({
   image: {
     width: "100%",
     height: 500,
-  },
-  userInfo: {
-    alignItems: "center",
-    backgroundColor: colors.white,
-    flexDirection: "row",
-    padding: 8,
-    paddingHorizontal: 10,
-    paddingTop: 20,
-  },
-  userInfoImage: {
-    width: 40,
-    height: 40,
-  },
-  userInfoText: {
-    fontSize: 15,
-    letterSpacing: 1,
-    paddingLeft: 15,
   },
 });
 

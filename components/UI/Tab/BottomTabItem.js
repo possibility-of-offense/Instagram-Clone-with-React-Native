@@ -6,6 +6,7 @@ import { Text } from "react-native";
 import colors from "../../../themes/colors";
 
 const BottomTabItem = (currentRoute, icon, route, text, type, last = false) => {
+  console.log(type, icon);
   return {
     tabBarIcon: ({ color, size, focused }) => {
       return type === "entypo" ? (
