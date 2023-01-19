@@ -1,27 +1,33 @@
 import {
   addDoc,
   collection,
+  doc,
+  increment,
   onSnapshot,
+  orderBy,
   query,
   serverTimestamp,
+  Timestamp,
+  updateDoc,
   where,
 } from "firebase/firestore";
 import React, { useContext, useEffect, useState } from "react";
 import {
   Dimensions,
+  FlatList,
   Image,
-  ScrollView,
   StyleSheet,
   Text,
   View,
 } from "react-native";
-import AppInput from "../components/UI/Input";
-import Loader from "../components/UI/Loader";
 
 // Own Dependencies
+import AppInput from "../components/UI/Input";
 import { AuthContext } from "../context/AuthContext";
 import { db } from "../firebase/config";
 import colors from "../themes/colors";
+import formatDate from "../helpers/formatDate";
+import Loader from "../components/UI/Loader";
 
 function CommentsScreen({ navigation, route }) {
   const { user } = useContext(AuthContext);
@@ -39,6 +45,7 @@ function CommentsScreen({ navigation, route }) {
     if (comment === "") return setError("Fill the input");
 
     setLoading(true);
+    setComment("");
 
     try {
       await addDoc(collection(db, "comments"), {
@@ -46,15 +53,21 @@ function CommentsScreen({ navigation, route }) {
         username: user.email || user.displayName,
         image: user.photoUrl || null,
         postId: route.params.postId,
-        timeStamp: serverTimestamp(),
+        timestamp: serverTimestamp(),
         likes: 0,
         commentBody: comment,
       });
 
+      await updateDoc(
+        doc(db, "users", user.uid, "posts", route.params.postId),
+        {
+          comments: increment(1),
+        }
+      );
+
       setLoading(false);
     } catch (error) {
       setLoading(false);
-      console.log(error);
     }
   };
 
@@ -63,22 +76,24 @@ function CommentsScreen({ navigation, route }) {
     const unsub = onSnapshot(
       query(
         collection(db, "comments"),
-        where("postId", "==", route.params.postId)
+        where("postId", "==", route.params.postId),
+        orderBy("timestamp", "desc")
       ),
-      (snapshot) =>
+      (snapshot) => {
         setComments(
           snapshot.docs.map((document) => ({
             id: document.id,
             ...document.data(),
           }))
-        )
+        );
+      }
     );
 
     return () => unsub();
-  });
+  }, []);
 
   return (
-    <ScrollView style={styles.container}>
+    <View style={styles.container}>
       <View style={styles.commentForm}>
         {user.photoUrl ? (
           <Image
@@ -111,17 +126,47 @@ function CommentsScreen({ navigation, route }) {
         {loading ? (
           <Loader visible={true} />
         ) : (
-          <View>
-            {comments.length > 0 &&
-              comments.map((comment) => (
-                <Text key={comment.id}>
-                  {comment.commentBody} by {comment.username}
-                </Text>
-              ))}
-          </View>
+          <FlatList
+            data={comments}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => {
+              return (
+                <View key={item.id} style={styles.listItem}>
+                  <View style={styles.listItemBody}>
+                    {item.image ? (
+                      <Image
+                        source={{ uri: item.image }}
+                        style={styles.image}
+                      />
+                    ) : (
+                      <Image
+                        style={styles.image}
+                        source={require("../assets/images/person.jpg")}
+                      />
+                    )}
+                    <View style={styles.commentBody}>
+                      <Text style={styles.commentBodyText}>
+                        <Text style={styles.commentBodyUsername}>
+                          {item.username}
+                        </Text>{" "}
+                        {item.commentBody}
+                      </Text>
+                    </View>
+                  </View>
+                  <Text style={styles.date}>{formatDate(item.timestamp)}</Text>
+                </View>
+              );
+            }}
+            ItemSeparatorComponent={() => (
+              <View
+                style={{ borderBottomWidth: 1, borderBottomColor: "#ddd" }}
+              />
+            )}
+            onEndReachedThreshold={0}
+          />
         )}
       </View>
-    </ScrollView>
+    </View>
   );
 }
 
@@ -137,6 +182,17 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
     flex: 1,
   },
+  commentBody: {
+    paddingLeft: 20,
+    paddingTop: 7,
+  },
+  commentBodyText: {
+    fontSize: 16,
+    lineHeight: 20,
+  },
+  commentBodyUsername: {
+    fontWeight: "bold",
+  },
   commentForm: {
     backgroundColor: "#efefef",
     borderBottomColor: colors.grey,
@@ -148,6 +204,10 @@ const styles = StyleSheet.create({
   },
   commentsGrid: {
     minHeight: Dimensions.get("window").height / 2,
+  },
+  date: {
+    textAlign: "right",
+    paddingTop: 5,
   },
   errorMsg: {
     color: "red",
@@ -172,6 +232,20 @@ const styles = StyleSheet.create({
     padding: 1524121142,
     paddingHorizontal: 20,
     paddingRight: 60,
+  },
+  image: {
+    bordeRadius: 20,
+    height: 40,
+    width: 40,
+  },
+  listItem: {
+    flexDirection: "column",
+    padding: 10,
+    paddingRight: 20,
+  },
+  listItemBody: {
+    flexDirection: "row",
+    paddingRight: 30,
   },
   userPhoto: {
     height: 40,

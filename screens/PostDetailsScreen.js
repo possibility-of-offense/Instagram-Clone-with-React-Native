@@ -37,14 +37,6 @@ function PostDetailsScreen({ navigation, route }) {
   useEffect(() => {
     const fetching = async () => {
       try {
-        const l = await getDocs(
-          query(
-            collection(db, "likes"),
-            where("userId", "==", user.uid),
-            where("postId", "==", route.params.id)
-          )
-        );
-
         const [post, likes] = await Promise.all([
           getDoc(doc(db, "users", user.uid, "posts", route.params.id)),
           getDocs(
@@ -55,6 +47,8 @@ function PostDetailsScreen({ navigation, route }) {
             )
           ),
         ]);
+
+        console.log(post.data());
 
         setPostObj({
           post: post.data(),
