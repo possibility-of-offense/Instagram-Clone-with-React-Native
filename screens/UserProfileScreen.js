@@ -93,7 +93,7 @@ function UserProfileScreen({ navigation, route }) {
               {user.email || user.displayName}
             </Text>
             <Button
-              onPress={() => navigation.navigate("Edit User Info")}
+              onPress={() => navigation.navigate("Edit Profile")}
               styleObject={{ btn: styles.editBtn, btnText: styles.editBtnText }}
               title="Edit Profile"
               underlayColor={colors.lightGrey}

@@ -26,7 +26,7 @@ const ProfileNavigator = () => {
       <Stack.Screen component={PostsScreen} name="All Posts" />
       <Stack.Screen component={FollowersScreen} name="Followers" />
       <Stack.Screen component={FollowingScreen} name="Following" />
-      <Stack.Screen component={EditUserInfoScreen} name="Edit User Info" />
+      <Stack.Screen component={EditUserInfoScreen} name="Edit Profile" />
       <Stack.Screen component={PostDetailsScreen} name="Post Details" />
       <Stack.Screen component={CommentsScreen} name="Comments" />
     </Stack.Navigator>

@@ -1,4 +1,5 @@
-3. Finish Search functionality
+1. Finish Edit Profile
+2. Finish Search functionality
 
 # New User
 
