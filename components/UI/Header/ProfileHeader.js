@@ -7,7 +7,12 @@ import colors from "../../../themes/colors";
 
 function ProfileHeader(props) {
   return (
-    <View style={styles.container}>
+    <View
+      style={[
+        styles.container,
+        { backgroundColor: props.route.name === "Comments" && colors.white },
+      ]}
+    >
       {props.route.name !== "Profile Info" && (
         <AntDesign
           name="leftcircle"

@@ -23,9 +23,10 @@ import {
 // Own Dependencies
 import { AuthContext } from "../context/AuthContext";
 import { db } from "../firebase/config";
+import Loader from "../components/UI/Loader";
 import pluralizeWord from "../helpers/pluralizeWord";
 
-function PostDetailsScreen(props) {
+function PostDetailsScreen({ navigation, route }) {
   const { user } = useContext(AuthContext);
   const [postObj, setPostObj] = useState({
     post: null,
@@ -35,29 +36,29 @@ function PostDetailsScreen(props) {
   useEffect(() => {
     const fetching = async () => {
       try {
+        const l = await getDocs(
+          query(
+            collection(db, "likes"),
+            where("userId", "==", user.uid),
+            where("postId", "==", route.params.id)
+          )
+        );
+
         const [post, likes] = await Promise.all([
-          getDoc(doc(db, "users", user.uid, "posts", props.route.params.id)),
+          getDoc(doc(db, "users", user.uid, "posts", route.params.id)),
           getDocs(
             query(
               collection(db, "likes"),
               where("userId", "==", user.uid),
-              where("postId", "==", props.route.params.id)
+              where("postId", "==", route.params.id)
             )
           ),
         ]);
 
-        console.log(post.data());
-
         setPostObj({
           post: post.data(),
-          hasLiked: likes.docs.length > 0,
+          hasLiked: likes.docs.length > 0 ? true : false,
         });
-
-        if (findById.docs.length > 0) {
-          setIsLiked(true);
-        } else {
-          setIsLiked(false);
-        }
       } catch (error) {}
     };
 
@@ -74,17 +75,14 @@ function PostDetailsScreen(props) {
         hasLiked: true,
       });
 
-      await updateDoc(
-        doc(db, "users", user.uid, "posts", props.route.params.id),
-        {
-          likes: increment(1),
-        }
-      );
+      await updateDoc(doc(db, "users", user.uid, "posts", route.params.id), {
+        likes: increment(1),
+      });
       await addDoc(collection(db, "likes"), {
         userId: user.uid,
         username: user.email || user.displayName,
         image: user.photoUrl || null,
-        postId: props.route.params.id,
+        postId: route.params.id,
       });
     } catch (error) {
       console.log(error);
@@ -121,7 +119,10 @@ function PostDetailsScreen(props) {
             <Text>{pluralizeWord("Like", postObj.post.likes)}</Text>
           </View>
 
-          <TouchableOpacity style={styles.actionsIcon}>
+          <TouchableOpacity
+            onPress={() => navigation.navigate("Comments")}
+            style={styles.actionsIcon}
+          >
             <View style={styles.commentsContainer}>
               <MaterialCommunityIcons
                 name="comment-outline"
@@ -138,7 +139,7 @@ function PostDetailsScreen(props) {
       </ScrollView>
     );
   } else {
-    return <Text>Waiting...</Text>;
+    return <Loader visible={true} />;
   }
 }
 
