@@ -8,47 +8,50 @@ import {
   View,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-
-// Own Dependencies
-import { AuthContext } from "../context/AuthContext";
-import useApi from "../api/useApi";
 import {
   addDoc,
   collection,
   doc,
+  getDoc,
   getDocs,
   increment,
   query,
   updateDoc,
   where,
 } from "firebase/firestore";
+
+// Own Dependencies
+import { AuthContext } from "../context/AuthContext";
 import { db } from "../firebase/config";
+import pluralizeWord from "../helpers/pluralizeWord";
 
 function PostDetailsScreen(props) {
   const { user } = useContext(AuthContext);
-
-  const { data: post } = useApi({
-    id: props.route.params.id,
-    type: "document",
-    name: "posts",
-    realTime: false,
+  const [postObj, setPostObj] = useState({
+    post: null,
+    hasLiked: null,
   });
-
-  const [isLiked, setIsLiked] = useState(false);
 
   useEffect(() => {
     const fetching = async () => {
       try {
-        const findById = await getDocs(
-          query(
-            collection(db, "likes"),
-            where("userId", "==", user.uid),
-            where("postId", "==", props.route.params.id)
-          )
-        );
+        const [post, likes] = await Promise.all([
+          getDoc(doc(db, "users", user.uid, "posts", props.route.params.id)),
+          getDocs(
+            query(
+              collection(db, "likes"),
+              where("userId", "==", user.uid),
+              where("postId", "==", props.route.params.id)
+            )
+          ),
+        ]);
 
-        const posts = await getDocs(collection(db, "users", user.uid, "posts"));
-        console.log(posts);
+        console.log(post.data());
+
+        setPostObj({
+          post: post.data(),
+          hasLiked: likes.docs.length > 0,
+        });
 
         if (findById.docs.length > 0) {
           setIsLiked(true);
@@ -63,10 +66,20 @@ function PostDetailsScreen(props) {
 
   const handleLike = async () => {
     try {
-      setIsLiked(true);
-      await updateDoc(doc(db, "posts", props.route.params.id), {
-        likes: increment(1),
+      setPostObj({
+        post: {
+          ...postObj.post,
+          likes: postObj.post.likes + 1,
+        },
+        hasLiked: true,
       });
+
+      await updateDoc(
+        doc(db, "users", user.uid, "posts", props.route.params.id),
+        {
+          likes: increment(1),
+        }
+      );
       await addDoc(collection(db, "likes"), {
         userId: user.uid,
         username: user.email || user.displayName,
@@ -78,37 +91,50 @@ function PostDetailsScreen(props) {
     }
   };
 
-  if (post) {
+  if (
+    Object.values(postObj).length > 0 &&
+    postObj.post !== null &&
+    postObj.hasLiked !== null
+  ) {
     return (
       <ScrollView style={styles.container}>
-        <Image source={{ uri: post.image }} style={styles.image} />
+        <Image source={{ uri: postObj.post.image }} style={styles.image} />
         <View style={styles.actions}>
-          {!isLiked ? (
-            <TouchableOpacity onPress={handleLike} style={styles.actionsIcon}>
+          <View style={styles.likesContainer}>
+            {!postObj.hasLiked ? (
+              <TouchableOpacity onPress={handleLike} style={styles.actionsIcon}>
+                <MaterialCommunityIcons
+                  name="cards-heart-outline"
+                  size={34}
+                  color="black"
+                />
+              </TouchableOpacity>
+            ) : (
+              <View style={styles.actionsIcon}>
+                <MaterialCommunityIcons
+                  name="cards-heart"
+                  size={34}
+                  color="red"
+                />
+              </View>
+            )}
+            <Text>{pluralizeWord("Like", postObj.post.likes)}</Text>
+          </View>
+
+          <TouchableOpacity style={styles.actionsIcon}>
+            <View style={styles.commentsContainer}>
               <MaterialCommunityIcons
-                name="cards-heart-outline"
+                name="comment-outline"
                 size={34}
                 color="black"
               />
-            </TouchableOpacity>
-          ) : (
-            <View style={styles.actionsIcon}>
-              <MaterialCommunityIcons
-                name="cards-heart"
-                size={34}
-                color="red"
-              />
+              <Text style={styles.commentsContainerText}>
+                {pluralizeWord("Comment", postObj.post.comments)}
+              </Text>
             </View>
-          )}
-          <TouchableOpacity style={styles.actionsIcon}>
-            <MaterialCommunityIcons
-              name="comment-outline"
-              size={34}
-              color="black"
-            />
           </TouchableOpacity>
         </View>
-        <Text style={styles.description}>{post.description}</Text>
+        <Text style={styles.description}>{postObj.post.description}</Text>
       </ScrollView>
     );
   } else {
@@ -125,6 +151,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     paddingTop: 10,
   },
+  commentsContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  commentsContainerText: {
+    paddingLeft: 10,
+  },
   container: {},
   description: {
     fontSize: 17,
@@ -134,6 +167,11 @@ const styles = StyleSheet.create({
   image: {
     width: "100%",
     height: 500,
+  },
+  likesContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingRight: 10,
   },
 });
 
