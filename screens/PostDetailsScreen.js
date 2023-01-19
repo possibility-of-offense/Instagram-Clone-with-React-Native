@@ -47,6 +47,9 @@ function PostDetailsScreen(props) {
           )
         );
 
+        const posts = await getDocs(collection(db, "users", user.uid, "posts"));
+        console.log(posts);
+
         if (findById.docs.length > 0) {
           setIsLiked(true);
         } else {
