@@ -64,10 +64,12 @@ const AppNavigator = () => {
       <Tab.Screen
         component={ProfileNavigator}
         name="Profile"
-        listeners={({ route }) => ({
+        listeners={({ navigation, route }) => ({
           focus: () => {
             setCurrentRoute(route.name);
           },
+          tabPress: (e) =>
+            navigation.jumpTo("Profile", { screen: "Profile Info" }),
         })}
         options={{
           ...BottomTabItem(

@@ -1,5 +1,5 @@
 import { updateProfile } from "firebase/auth";
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { doc, updateDoc } from "firebase/firestore";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { Feather } from "@expo/vector-icons";
@@ -12,10 +12,12 @@ import Button from "../components/UI/Button";
 import colors from "../themes/colors";
 import Loader from "../components/UI/Loader";
 
-function EditUserInfoScreen({ navigation }) {
+function EditUserInfoScreen({ navigation, route }) {
   const { user } = useContext(AuthContext);
 
-  const [username, setUsername] = useState(() => user.email);
+  const [username, setUsername] = useState(
+    () => user.displayName || user.email
+  );
   const [invalidUsername, setInvalidUsername] = useState(false);
 
   const [name, setName] = useState("");
@@ -59,7 +61,6 @@ function EditUserInfoScreen({ navigation }) {
       });
 
       setLoading(false);
-      navigation.navigate("Post Details");
     } catch (error) {
       setErrorUpdating(true);
       setLoading(false);
@@ -83,6 +84,11 @@ function EditUserInfoScreen({ navigation }) {
             value={username}
             visible={invalidUsername ? true : false}
           />
+          <Text style={styles.helper}>
+            This will be shown as the username (the email will be staying the
+            same)
+          </Text>
+
           <Text style={styles.label}>Name</Text>
           <AppInput
             error={invalidName}

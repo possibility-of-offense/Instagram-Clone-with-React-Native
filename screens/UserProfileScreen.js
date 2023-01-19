@@ -15,6 +15,8 @@ import {
   startAt,
   orderBy,
   onSnapshot,
+  getDoc,
+  doc,
 } from "firebase/firestore";
 
 // Own Dependecies
@@ -41,7 +43,7 @@ function UserProfileScreen({ navigation, route }) {
   });
 
   const [postsData, setPostsData] = useState([]);
-  const [lastDocumentSnapshot, setLastDocumentSnapshot] = useState(null);
+  const [bio, setBio] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
 
@@ -52,9 +54,13 @@ function UserProfileScreen({ navigation, route }) {
         const q = query(
           collection(db, "users", user.uid, "posts"),
           limit(6),
-          orderBy("timestamp"),
-          startAt(lastDocumentSnapshot || 0)
+          orderBy("timestamp")
         );
+
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (userDoc.exists()) {
+          setBio(userDoc.data().bio);
+        }
 
         onSnapshot(q, (snapshot) => {
           const documents = snapshot;
@@ -90,8 +96,9 @@ function UserProfileScreen({ navigation, route }) {
           )}
           <View style={styles.userInfoNameContainer}>
             <Text style={styles.userInfoName}>
-              {user.email || user.displayName}
+              {user.displayName || user.email}
             </Text>
+            {bio && <Text style={{ marginTop: 10 }}>{bio}</Text>}
             <Button
               onPress={() => navigation.navigate("Edit Profile")}
               styleObject={{ btn: styles.editBtn, btnText: styles.editBtnText }}

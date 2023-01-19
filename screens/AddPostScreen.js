@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   addDoc,
   collection,
@@ -35,6 +35,10 @@ function AddPostScreen(props) {
   const [error, setError] = useState(false);
 
   const { user } = useContext(AuthContext);
+
+  useEffect(() => {
+    setError(false);
+  }, [isFocused]);
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({

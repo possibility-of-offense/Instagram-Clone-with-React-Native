@@ -102,7 +102,9 @@ function PostsScreen({ navigation }) {
           >
             <View>
               <Image source={{ uri: item.image }} style={styles.image} />
-              <Text style={styles.description}>{item.description}</Text>
+              <Text style={styles.description}>
+                {item.description.split(" ").slice(0, 10).join(" ")}
+              </Text>
             </View>
           </TouchableWithoutFeedback>
         )}
