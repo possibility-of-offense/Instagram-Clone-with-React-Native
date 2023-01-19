@@ -4,6 +4,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TouchableHighlight,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -119,9 +120,10 @@ function PostDetailsScreen({ navigation, route }) {
             <Text>{pluralizeWord("Like", postObj.post.likes)}</Text>
           </View>
 
-          <TouchableOpacity
+          <TouchableHighlight
             onPress={() => navigation.navigate("Comments")}
             style={styles.actionsIcon}
+            underlayColor="#ddd"
           >
             <View style={styles.commentsContainer}>
               <MaterialCommunityIcons
@@ -133,7 +135,7 @@ function PostDetailsScreen({ navigation, route }) {
                 {pluralizeWord("Comment", postObj.post.comments)}
               </Text>
             </View>
-          </TouchableOpacity>
+          </TouchableHighlight>
         </View>
         <Text style={styles.description}>{postObj.post.description}</Text>
       </ScrollView>
@@ -145,6 +147,7 @@ function PostDetailsScreen({ navigation, route }) {
 
 const styles = StyleSheet.create({
   actionsIcon: {
+    borderRadius: 15,
     marginRight: 10,
   },
   actions: {
@@ -153,8 +156,10 @@ const styles = StyleSheet.create({
     paddingTop: 10,
   },
   commentsContainer: {
-    flexDirection: "row",
     alignItems: "center",
+    flexDirection: "row",
+    overflow: "hidden",
+    padding: 6,
   },
   commentsContainerText: {
     paddingLeft: 10,
