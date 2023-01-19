@@ -1,8 +1,8 @@
-const pluralizeWord = (word, len) => {
-  if (len === 0) return `${len} ${word}s`;
+const pluralizeWord = (word, len, showNum = true) => {
+  if (len === 0) return `${showNum ? len + " " : ""}${word}s`;
   else {
-    if (len === 1) return `${len} ${word}`;
-    else return `${len} ${word}s`;
+    if (len === 1) return `${showNum ? len + " " : ""}${word}`;
+    else return `${showNum ? len + " " : ""}${word}s`;
   }
 };
 

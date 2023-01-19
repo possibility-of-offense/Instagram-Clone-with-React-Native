@@ -121,7 +121,9 @@ function PostDetailsScreen({ navigation, route }) {
           </View>
 
           <TouchableHighlight
-            onPress={() => navigation.navigate("Comments")}
+            onPress={() =>
+              navigation.navigate("Comments", { postId: route.params.id })
+            }
             style={styles.actionsIcon}
             underlayColor="#ddd"
           >

@@ -25,13 +25,14 @@ import { db } from "../firebase/config";
 import Loader from "../components/UI/Loader";
 import useApi from "../api/useApi";
 import UserProfileTab from "../components/UI/Tab/UserProfileTab";
+import pluralizeWord from "../helpers/pluralizeWord";
 
 // Helpers
-const defineWord = (word, len) => (len === 1 ? word : word + "s");
 
 function UserProfileScreen({ navigation, route }) {
   const { user } = useContext(AuthContext);
 
+  // REFACTOR
   const { data: userInfo } = useApi({
     type: "document",
     name: "users",
@@ -116,14 +117,14 @@ function UserProfileScreen({ navigation, route }) {
                   onPress={() => {
                     navigation.navigate("Followers");
                   }}
-                  title={userInfo?.followers}
+                  title={userInfo?.followers || 0}
                   subTitle="Followers"
                 />
                 <UserProfileTab
                   onPress={() => {
                     navigation.navigate("Following");
                   }}
-                  title={userInfo?.following}
+                  title={userInfo?.following || 0}
                   subTitle="Following"
                 />
               </View>
@@ -131,7 +132,7 @@ function UserProfileScreen({ navigation, route }) {
                 <View style={styles.checkAllBtnContainer}>
                   <Text style={styles.postsHeading}>
                     {postsData.length} most recent{" "}
-                    {defineWord("post", postsData.length)}!
+                    {pluralizeWord("post", postsData.length, false)}!
                   </Text>
                   <Button
                     onPress={() => navigation.navigate("All Posts")}
