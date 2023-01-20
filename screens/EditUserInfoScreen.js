@@ -1,6 +1,14 @@
 import { updateProfile } from "firebase/auth";
 import React, { useCallback, useContext, useEffect, useState } from "react";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  updateDoc,
+  where,
+} from "firebase/firestore";
 import {
   ScrollView,
   StyleSheet,
@@ -203,10 +211,28 @@ function EditUserInfoScreen({ navigation, route }) {
         displayName: editState.username.value,
         photoURL: url,
       });
+
+      // REFACTOR use transcation to update every image on the user in the collections
+
+      if (editState.image) {
+        const userInComments = await getDocs(
+          query(collection(db, "comments"), where("userId", "==", user.uid))
+        );
+
+        for (let user of userInComments.docs) {
+          await updateDoc(doc(db, "comments", user.id), {
+            image: url,
+          });
+        }
+      }
+
+      // REFACTOR
+
       await updateDoc(doc(db, "users", user.uid), {
         bio: editState.bio.value,
         username: editState.username.value,
         name: editState.name.value,
+        image: url || null,
       });
 
       setEditState((prev) => ({ ...prev, loading: false }));

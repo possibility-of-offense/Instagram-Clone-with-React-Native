@@ -1,5 +1,5 @@
 import { Dimensions } from "react-native";
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import React, { useCallback, useContext, useState } from "react";
 import {
   Image,
   ScrollView,
@@ -12,12 +12,12 @@ import {
   collection,
   query,
   limit,
-  startAt,
   orderBy,
   onSnapshot,
   getDoc,
   doc,
 } from "firebase/firestore";
+import { useFocusEffect } from "@react-navigation/native";
 
 // Own Dependecies
 import { AuthContext } from "../context/AuthContext";
@@ -25,71 +25,69 @@ import Button from "../components/UI/Button";
 import colors from "../themes/colors";
 import { db } from "../firebase/config";
 import Loader from "../components/UI/Loader";
-import useApi from "../api/useApi";
-import UserProfileTab from "../components/UI/Tab/UserProfileTab";
 import pluralizeWord from "../helpers/pluralizeWord";
-import { useFocusEffect } from "@react-navigation/native";
+import UserProfileTab from "../components/UI/Tab/UserProfileTab";
 
 // Helpers
 
 function UserProfileScreen({ navigation, route }) {
   const { user } = useContext(AuthContext);
 
-  // REFACTOR
-  const { data: userInfo } = useApi({
-    type: "document",
-    name: "users",
-    realTime: true,
-    id: user.uid,
-  });
-
   const [postsData, setPostsData] = useState([]);
+
+  const [userData, setUserData] = useState({});
   const [image, setImage] = useState("");
-  const [bio, setBio] = useState("");
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
       setImage(user.photoURL);
+
+      const fetchData = async () => {
+        try {
+          const userDoc = await getDoc(doc(db, "users", user.uid));
+          if (userDoc.exists()) {
+            setUserData(userDoc.data());
+          }
+
+          const q = query(
+            collection(db, "users", user.uid, "posts"),
+            limit(6),
+            orderBy("timestamp")
+          );
+          const unsub = onSnapshot(
+            q,
+            (snapshot) => {
+              const documents = snapshot;
+              const mapped = documents.docs.map((document) => ({
+                id: document.id,
+                ...document.data(),
+              }));
+              setPostsData(mapped);
+              setLoading(false);
+            },
+            (error) => {
+              setError("Error while getting posts!");
+              setLoading(false);
+            }
+          );
+
+          return () => unsub();
+        } catch (error) {
+          setError("Error while getting users info!");
+          setLoading(false);
+        }
+      };
+      fetchData();
     }, [route])
   );
-
-  useEffect(() => {
-    const fetching = async () => {
-      setLoading(true);
-      try {
-        const q = query(
-          collection(db, "users", user.uid, "posts"),
-          limit(6),
-          orderBy("timestamp")
-        );
-
-        const userDoc = await getDoc(doc(db, "users", user.uid));
-        if (userDoc.exists()) {
-          setBio(userDoc.data().bio);
-        }
-
-        onSnapshot(q, (snapshot) => {
-          const documents = snapshot;
-          const mapped = documents.docs.map((document) => ({
-            id: document.id,
-            ...document.data(),
-          }));
-          setPostsData(mapped);
-          setLoading(false);
-        });
-      } catch (error) {
-        setError("Error while getting posts!");
-        setLoading(false);
-      }
-    };
-    fetching();
-  }, []);
 
   return (
     <ScrollView>
       <View style={styles.container}>
+        {error && <Text style={styles.error}>{error}</Text>}
         <View style={styles.userInfoContainer}>
           {image ? (
             <Image source={{ uri: image }} style={styles.userInfoImage} />
@@ -103,7 +101,9 @@ function UserProfileScreen({ navigation, route }) {
             <Text style={styles.userInfoName}>
               {user.displayName || user.email}
             </Text>
-            {bio && <Text style={{ marginTop: 10 }}>{bio}</Text>}
+            {userData?.bio && (
+              <Text style={{ marginTop: 10 }}>{userData?.bio}</Text>
+            )}
             <Button
               onPress={() => navigation.navigate("Edit Profile")}
               styleObject={{ btn: styles.editBtn, btnText: styles.editBtnText }}
@@ -129,14 +129,14 @@ function UserProfileScreen({ navigation, route }) {
                   onPress={() => {
                     navigation.navigate("Followers");
                   }}
-                  title={userInfo?.followers || 0}
+                  title={userData?.followers || 0}
                   subTitle="Followers"
                 />
                 <UserProfileTab
                   onPress={() => {
                     navigation.navigate("Following");
                   }}
-                  title={userInfo?.following || 0}
+                  title={userData?.following || 0}
                   subTitle="Following"
                 />
               </View>
@@ -219,6 +219,13 @@ const styles = StyleSheet.create({
   },
   editBtnText: {
     color: colors.dark,
+  },
+  error: {
+    color: "red",
+    fontWeight: "bold",
+    fontSize: 16,
+    textAlign: "center",
+    paddingTop: 15,
   },
   loaderContainer: {
     width: "100%",
