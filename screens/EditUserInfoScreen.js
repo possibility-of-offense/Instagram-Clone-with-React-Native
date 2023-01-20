@@ -1,55 +1,79 @@
 import { updateProfile } from "firebase/auth";
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import * as ImagePicker from "expo-image-picker";
 import { Feather } from "@expo/vector-icons";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { useFocusEffect } from "@react-navigation/native";
 
 // Own Dependencies
 import AppInput from "../components/UI/Input";
-import { auth, db } from "../firebase/config";
+import { auth, db, storage } from "../firebase/config";
 import { AuthContext } from "../context/AuthContext";
 import Button from "../components/UI/Button";
 import colors from "../themes/colors";
 import Loader from "../components/UI/Loader";
-import { useFocusEffect } from "@react-navigation/native";
 
 function EditUserInfoScreen({ navigation, route }) {
   const { user } = useContext(AuthContext);
 
-  const [username, setUsername] = useState(
-    () => user.displayName || user.email
-  );
-  const [invalidUsername, setInvalidUsername] = useState(false);
-
-  const [name, setName] = useState("");
-  const [invalidName, setInvalidName] = useState(false);
-
-  const [bio, setBio] = useState("");
-  const [invalidBio, setInvalidBio] = useState(false);
-
-  const [error, setError] = useState(false);
-  const [loading, setLoading] = useState(null);
+  const [editState, setEditState] = useState({
+    name: {
+      value: "",
+      invalid: false,
+    },
+    username: {
+      value: user.displayName || user.email,
+      invalid: false,
+    },
+    bio: {
+      value: "",
+      invalid: false,
+    },
+    image: "",
+    error: false,
+    loading: null,
+  });
 
   // Fetch user
   useFocusEffect(
     useCallback(() => {
       const fetchUser = async () => {
-        setLoading(true);
+        setEditState((prev) => ({ ...prev, loading: true }));
 
         try {
           const userObj = await getDoc(doc(db, "users", user.uid));
+          const userObjData = userObj.exists() ? userObj.data() : null;
 
-          if (userObj.exists()) {
-            const userObjData = userObj.data();
-
-            setUsername(userObjData.username);
-            setName(userObjData.name);
-            setBio(userObjData.bio);
-          }
-          setLoading(false);
+          setEditState({
+            loading: false,
+            error: false,
+            name: {
+              invalid: false,
+              value: userObjData?.name,
+            },
+            username: {
+              invalid: false,
+              value: userObjData?.username,
+            },
+            bio: {
+              invalid: false,
+              value: userObjData?.bio,
+            },
+          });
         } catch (error) {
-          setLoading(false);
-          setError("Error getting user info!");
+          setEditState((prev) => ({
+            ...prev,
+            loading: false,
+            error: "Error getting user info!",
+          }));
         }
       };
       fetchUser();
@@ -58,59 +82,175 @@ function EditUserInfoScreen({ navigation, route }) {
     }, [route])
   );
 
-  // Reset Error
+  // Reset Error / Invalid state
   useEffect(() => {
     if (
-      username !== "" &&
-      (invalidUsername !== "" || invalidUsername !== false)
-    )
-      setInvalidUsername(false);
+      editState.username.value !== "" &&
+      (editState.username.invalid !== "" ||
+        editState.username.invalid !== false)
+    ) {
+      setEditState((prev) => ({
+        ...prev,
+        username: {
+          ...prev.username,
+          invalid: false,
+        },
+      }));
+    }
 
-    if (name !== "" && (invalidName !== "" || invalidName !== false))
-      setInvalidName(false);
+    if (
+      editState.name.value !== "" &&
+      (editState.name.invalid !== "" || editState.name.invalid !== false)
+    ) {
+      setEditState((prev) => ({
+        ...prev,
+        name: {
+          ...prev.name,
+          invalid: false,
+        },
+      }));
+    }
 
-    if (bio !== "" && (invalidBio !== "" || invalidBio !== false))
-      setInvalidBio(false);
-  }, [username, bio]);
+    if (
+      editState.bio.value !== "" &&
+      (editState.bio.invalid !== "" || editState.bio.invalid !== false)
+    ) {
+      setEditState((prev) => ({
+        ...prev,
+        bio: {
+          ...prev.bio,
+          invalid: false,
+        },
+      }));
+    }
+  }, [
+    editState.username.value,
+    editState.username.invalid,
+    editState.name.value,
+    editState.name.invalid,
+    editState.bio.value,
+    editState.bio.invalid,
+  ]);
 
-  // Update Profile
-  const handleUpdateProfile = async () => {
-    if (username === "") return setInvalidUsername("Invalid username");
-    if (name === "") return setInvalidName("Invalid name");
-    if (bio === "") return setInvalidBio("Invalid bio");
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      base64: true,
+      quality: 1,
+    });
 
-    setLoading(true);
-    try {
-      await updateProfile(auth.currentUser, {
-        displayName: username,
-      });
-      await updateDoc(doc(db, "users", user.uid), {
-        bio,
-        username,
-        name,
-      });
-
-      setLoading(false);
-    } catch (error) {
-      setError(true);
-      setLoading(false);
+    if (!result.canceled) {
+      setEditState((prev) => ({
+        ...prev,
+        image: result.assets[0].uri,
+      }));
     }
   };
 
+  // Update Profile
+  const handleUpdateProfile = async () => {
+    if (editState.username.value === "")
+      return setEditState((prev) => ({
+        ...prev,
+        username: { ...editState.username, invalid: true },
+      }));
+    if (editState.name.value === "")
+      return setEditState((prev) => ({
+        ...prev,
+        name: { ...editState.name, invalid: true },
+      }));
+    if (editState.bio.value === "")
+      return setEditState((prev) => ({
+        ...prev,
+        bio: { ...editState.bio, invalid: true },
+      }));
+
+    // Main logic
+    setEditState((prev) => ({ ...prev, loading: true }));
+    try {
+      let userPostImageRef;
+      let url;
+
+      if (editState.image) {
+        const blob = await new Promise((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+          xhr.onload = function () {
+            resolve(xhr.response);
+          };
+          xhr.onerror = function () {
+            reject(new TypeError("Network request failed"));
+          };
+          xhr.responseType = "blob";
+          xhr.open("GET", editState.image, true);
+          xhr.send(null);
+        });
+
+        userPostImageRef = ref(
+          storage,
+          `users/${user.uid}/profile/profileImage`
+        );
+
+        try {
+          await uploadBytes(userPostImageRef, blob);
+          url = await getDownloadURL(userPostImageRef);
+        } catch (error) {
+          throw new Error("Error while uploading the image!");
+        }
+      }
+
+      await updateProfile(auth.currentUser, {
+        displayName: editState.username.value,
+        photoURL: url,
+      });
+      await updateDoc(doc(db, "users", user.uid), {
+        bio: editState.bio.value,
+        username: editState.username.value,
+        name: editState.name.value,
+      });
+
+      setEditState((prev) => ({ ...prev, loading: false }));
+
+      navigation.jumpTo("Profile", { screen: "Profile Info" });
+    } catch (error) {
+      setEditState((prev) => ({
+        ...prev,
+        loading: false,
+        error: "Error occured while updating profile! Try again!",
+      }));
+    }
+  };
+
+  // Handle Change
+  const handleChange = (param, text) => {
+    setEditState((prev) => ({
+      ...prev,
+      [param]: {
+        invalid: text !== "",
+        value: text,
+      },
+    }));
+  };
+
   return (
-    <ScrollView style={styles.container}>
-      {loading ? (
+    <ScrollView
+      contentContainerStyle={{ flexGrow: 1 }}
+      style={styles.container}
+    >
+      {editState.loading ? (
         <Loader visible={true} />
       ) : (
         <View style={styles.form}>
-          {error && <Text style={styles.networkError}>{error}</Text>}
+          {editState.error && (
+            <Text style={styles.networkError}>{editState.error}</Text>
+          )}
 
           <Text style={styles.label}>Username</Text>
           <AppInput
-            error={invalidUsername}
-            onChange={setUsername}
-            value={username}
-            visible={invalidUsername ? true : false}
+            error={editState?.username?.invalid}
+            onChange={handleChange.bind(null, "username")}
+            value={editState?.username?.value}
+            visible={editState?.username?.invalid ? true : false}
           />
           <Text style={styles.helper}>
             This will be shown as the username (the email will be staying the
@@ -119,10 +259,10 @@ function EditUserInfoScreen({ navigation, route }) {
 
           <Text style={styles.label}>Name</Text>
           <AppInput
-            error={invalidName}
-            onChange={setName}
-            value={name}
-            visible={invalidName ? true : false}
+            error={editState?.name?.invalid}
+            onChange={handleChange.bind(null, "name")}
+            value={editState?.name?.value}
+            visible={editState?.name?.invalid ? true : false}
           />
 
           <Text style={styles.helper}>
@@ -133,13 +273,13 @@ function EditUserInfoScreen({ navigation, route }) {
           <Text style={styles.label}>Bio</Text>
           <AppInput
             editable
-            error={invalidBio}
+            error={editState?.bio?.invalid}
             multiline
             numberOfLines={3}
-            onChange={setBio}
+            onChange={handleChange.bind(null, "bio")}
             styleObj={styles.bio}
-            value={bio}
-            visible={invalidBio ? true : false}
+            value={editState?.bio?.value}
+            visible={editState?.bio?.invalid ? true : false}
           />
           <Text style={styles.labelTitle}>Personal information</Text>
           <Text style={styles.helper}>
@@ -150,7 +290,9 @@ function EditUserInfoScreen({ navigation, route }) {
 
           <View style={styles.imageContainer}>
             <Text style={styles.imageContainerText}>Upload an image</Text>
-            <Feather name="upload" size={28} color="black" />
+            <TouchableOpacity onPress={pickImage}>
+              <Feather name="upload" size={28} color="black" />
+            </TouchableOpacity>
           </View>
 
           <Button

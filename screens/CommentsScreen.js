@@ -51,7 +51,7 @@ function CommentsScreen({ navigation, route }) {
       await addDoc(collection(db, "comments"), {
         userId: user.uid,
         username: user.email || user.displayName,
-        image: user.photoUrl || null,
+        image: user.photoURL || null,
         postId: route.params.postId,
         timestamp: serverTimestamp(),
         likes: 0,
@@ -95,10 +95,10 @@ function CommentsScreen({ navigation, route }) {
   return (
     <View style={styles.container}>
       <View style={styles.commentForm}>
-        {user.photoUrl ? (
+        {user.photoURL ? (
           <Image
             source={{
-              uri: user.photoUrl,
+              uri: user.photoURL,
             }}
             style={styles.userPhoto}
           />

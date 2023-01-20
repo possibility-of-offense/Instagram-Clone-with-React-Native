@@ -13,7 +13,6 @@ const AppInput = ({
 }) => {
   const inputRef = useRef();
 
-  // TODO focus on if the parent tab is focused!!!
   useEffect(() => {
     if (toFocus) {
       setTimeout(() => {

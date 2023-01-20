@@ -76,7 +76,7 @@ function PostDetailsScreen({ navigation, route }) {
       await addDoc(collection(db, "likes"), {
         userId: user.uid,
         username: user.email || user.displayName,
-        image: user.photoUrl || null,
+        image: user.photoURL || null,
         postId: route.params.id,
       });
     } catch (error) {

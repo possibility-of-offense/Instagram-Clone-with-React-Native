@@ -1,5 +1,5 @@
 import { Dimensions } from "react-native";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import {
   Image,
   ScrollView,
@@ -28,6 +28,7 @@ import Loader from "../components/UI/Loader";
 import useApi from "../api/useApi";
 import UserProfileTab from "../components/UI/Tab/UserProfileTab";
 import pluralizeWord from "../helpers/pluralizeWord";
+import { useFocusEffect } from "@react-navigation/native";
 
 // Helpers
 
@@ -43,9 +44,16 @@ function UserProfileScreen({ navigation, route }) {
   });
 
   const [postsData, setPostsData] = useState([]);
+  const [image, setImage] = useState("");
   const [bio, setBio] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      setImage(user.photoURL);
+    }, [route])
+  );
 
   useEffect(() => {
     const fetching = async () => {
@@ -83,11 +91,8 @@ function UserProfileScreen({ navigation, route }) {
     <ScrollView>
       <View style={styles.container}>
         <View style={styles.userInfoContainer}>
-          {user.photoUrl ? (
-            <Image
-              source={require("../assets/images/person.jpg")}
-              style={styles.userInfoImage}
-            />
+          {image ? (
+            <Image source={{ uri: image }} style={styles.userInfoImage} />
           ) : (
             <Image
               source={require("../assets/images/person.jpg")}

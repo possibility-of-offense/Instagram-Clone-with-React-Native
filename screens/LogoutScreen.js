@@ -5,14 +5,14 @@ import { StyleSheet, View } from "react-native";
 import Loader from "../components/UI/Loader";
 import { auth } from "../firebase/config";
 
-function LogoutScreen({ navigation }) {
+function LogoutScreen() {
   useFocusEffect(
     useCallback(() => {
       signOut(auth)
         .then(() => {
           alert(`You just sign out!`);
         })
-        .catch((err) => console.log(err));
+        .catch((err) => alert(`Couldn't sign out!`));
     }, [])
   );
 
