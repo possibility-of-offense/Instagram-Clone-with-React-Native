@@ -46,7 +46,7 @@ const AppNavigator = () => {
       <Tab.Screen
         component={AddPostScreen}
         name="Add Post"
-        listeners={({ route }) => ({
+        listeners={({ navigation, route }) => ({
           focus: () => {
             setCurrentRoute(route.name);
           },

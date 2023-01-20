@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useCallback, useContext, useState } from "react";
 import {
   addDoc,
   collection,
@@ -14,7 +14,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import "react-native-get-random-values";
 import { nanoid } from "nanoid";
 import * as ImagePicker from "expo-image-picker";
-import { useIsFocused } from "@react-navigation/native";
+import { useIsFocused, useFocusEffect } from "@react-navigation/native";
 
 // Own Dependencies
 
@@ -36,9 +36,19 @@ function AddPostScreen(props) {
 
   const { user } = useContext(AuthContext);
 
-  useEffect(() => {
-    setError(false);
-  }, [isFocused]);
+  const [focusInp, setFocusInp] = useState(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      setDescription("");
+      setFocusInp(true);
+      setError(false);
+
+      return () => {
+        setFocusInp(false);
+      };
+    }, [props.route.params, isFocused])
+  );
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -130,7 +140,7 @@ function AddPostScreen(props) {
                 multiline={true}
                 onChange={setDescription}
                 styleObj={styles.textInput}
-                toFocus={isFocused}
+                toFocus={focusInp}
                 placeholder="Enter description"
                 value={description}
               />

@@ -16,11 +16,13 @@ const AppInput = ({
   // TODO focus on if the parent tab is focused!!!
   useEffect(() => {
     if (toFocus) {
-      inputRef.current?.focus();
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 200);
     }
 
     return () => inputRef.current?.blur();
-  }, [toFocus]);
+  }, [toFocus, inputRef]);
 
   return (
     <>
@@ -50,7 +52,7 @@ const styles = StyleSheet.create({
     borderColor: "#ddd",
     borderWidth: 1,
     borderRadius: 3,
-    marginBottom: 10,
+    // marginBottom: 10,
   },
   error: {
     color: "red",
