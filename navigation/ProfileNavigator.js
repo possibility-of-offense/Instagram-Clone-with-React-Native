@@ -3,6 +3,7 @@ import { StyleSheet } from "react-native";
 
 // Own Dependencies
 import colors from "../themes/colors";
+import AnotherUserProfileScreen from "../screens/AnotherUserProfileScreen";
 import CommentsScreen from "../screens/CommentsScreen";
 import EditUserInfoScreen from "../screens/EditUserInfoScreen";
 import FollowersScreen from "../screens/FollowersScreen";
@@ -29,6 +30,10 @@ const ProfileNavigator = () => {
       <Stack.Screen component={EditUserInfoScreen} name="Edit Profile" />
       <Stack.Screen component={PostDetailsScreen} name="Post Details" />
       <Stack.Screen component={CommentsScreen} name="Comments" />
+      <Stack.Screen
+        component={AnotherUserProfileScreen}
+        name="Another User Profile Info"
+      />
     </Stack.Navigator>
   );
 };

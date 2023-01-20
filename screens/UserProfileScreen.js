@@ -46,6 +46,8 @@ function UserProfileScreen({ navigation, route }) {
       setImage(user.photoURL);
 
       const fetchData = async () => {
+        setLoading(true);
+
         try {
           const userDoc = await getDoc(doc(db, "users", user.uid));
           if (userDoc.exists()) {
