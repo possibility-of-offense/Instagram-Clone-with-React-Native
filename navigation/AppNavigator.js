@@ -11,6 +11,7 @@ import colors from "../themes/colors";
 import BottomTabItem from "../components/UI/Tab/BottomTabItem";
 import ProfileNavigator from "./ProfileNavigator";
 import SearchScreen from "../screens/SearchScreen";
+import LogoutScreen from "../screens/LogoutScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -95,6 +96,24 @@ const AppNavigator = () => {
             "person-search",
             "Search",
             "Search",
+            "material-design"
+          ),
+        }}
+      />
+      <Tab.Screen
+        component={LogoutScreen}
+        name="Logout"
+        listeners={({ route }) => ({
+          focus: () => {
+            setCurrentRoute(route.name);
+          },
+        })}
+        options={{
+          ...BottomTabItem(
+            currentRoute,
+            "logout",
+            "Logout",
+            "Logout",
             "material-design",
             true
           ),

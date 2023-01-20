@@ -1,6 +1,6 @@
 import { updateProfile } from "firebase/auth";
-import React, { useContext, useEffect, useState } from "react";
-import { doc, updateDoc } from "firebase/firestore";
+import React, { useCallback, useContext, useEffect, useState } from "react";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { Feather } from "@expo/vector-icons";
 
@@ -11,6 +11,7 @@ import { AuthContext } from "../context/AuthContext";
 import Button from "../components/UI/Button";
 import colors from "../themes/colors";
 import Loader from "../components/UI/Loader";
+import { useFocusEffect } from "@react-navigation/native";
 
 function EditUserInfoScreen({ navigation, route }) {
   const { user } = useContext(AuthContext);
@@ -26,9 +27,38 @@ function EditUserInfoScreen({ navigation, route }) {
   const [bio, setBio] = useState("");
   const [invalidBio, setInvalidBio] = useState(false);
 
-  const [errorUpdating, setErrorUpdating] = useState(false);
+  const [error, setError] = useState(false);
   const [loading, setLoading] = useState(null);
 
+  // Fetch user
+  useFocusEffect(
+    useCallback(() => {
+      const fetchUser = async () => {
+        setLoading(true);
+
+        try {
+          const userObj = await getDoc(doc(db, "users", user.uid));
+
+          if (userObj.exists()) {
+            const userObjData = userObj.data();
+
+            setUsername(userObjData.username);
+            setName(userObjData.name);
+            setBio(userObjData.bio);
+          }
+          setLoading(false);
+        } catch (error) {
+          setLoading(false);
+          setError("Error getting user info!");
+        }
+      };
+      fetchUser();
+
+      return () => {};
+    }, [route])
+  );
+
+  // Reset Error
   useEffect(() => {
     if (
       username !== "" &&
@@ -62,7 +92,7 @@ function EditUserInfoScreen({ navigation, route }) {
 
       setLoading(false);
     } catch (error) {
-      setErrorUpdating(true);
+      setError(true);
       setLoading(false);
     }
   };
@@ -73,9 +103,7 @@ function EditUserInfoScreen({ navigation, route }) {
         <Loader visible={true} />
       ) : (
         <View style={styles.form}>
-          {errorUpdating && (
-            <Text style={styles.networkError}>{errorUpdating}</Text>
-          )}
+          {error && <Text style={styles.networkError}>{error}</Text>}
 
           <Text style={styles.label}>Username</Text>
           <AppInput

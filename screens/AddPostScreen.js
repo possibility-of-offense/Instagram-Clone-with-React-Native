@@ -112,7 +112,8 @@ function AddPostScreen(props) {
                     setLoading(false);
                     props.navigation.navigate("Profile", {
                       screen: "All Posts",
-                      postAdded: true,
+                      // postAdded: true,
+                      // Test if removal breaks anything - it shouldn't
                     });
                   })
                   .catch((err) => setError(`Couldn't add document!`));
