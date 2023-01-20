@@ -13,6 +13,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TouchableHighlight,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -212,21 +213,27 @@ function EditUserInfoScreen({ navigation, route }) {
         photoURL: url,
       });
 
-      // REFACTOR use transcation to update every image on the user in the collections
-
       if (editState.image) {
-        const userInComments = await getDocs(
-          query(collection(db, "comments"), where("userId", "==", user.uid))
-        );
+        const [userInComments, userInLikes] = await Promise.all([
+          getDocs(
+            query(collection(db, "comments"), where("userId", "==", user.uid))
+          ),
+          getDocs(
+            query(collection(db, "likes"), where("userId", "==", user.uid))
+          ),
+        ]);
 
         for (let user of userInComments.docs) {
           await updateDoc(doc(db, "comments", user.id), {
             image: url,
           });
         }
+        for (let user of userInLikes.docs) {
+          await updateDoc(doc(db, "likes", user.id), {
+            image: url,
+          });
+        }
       }
-
-      // REFACTOR
 
       await updateDoc(doc(db, "users", user.uid), {
         bio: editState.bio.value,
@@ -314,12 +321,16 @@ function EditUserInfoScreen({ navigation, route }) {
             public profile.
           </Text>
 
-          <View style={styles.imageContainer}>
-            <Text style={styles.imageContainerText}>Upload an image</Text>
-            <TouchableOpacity onPress={pickImage}>
+          <TouchableHighlight
+            onPress={pickImage}
+            style={styles.imageContainer}
+            underlayColor="#eee"
+          >
+            <>
+              <Text style={styles.imageContainerText}>Upload an image</Text>
               <Feather name="upload" size={28} color="black" />
-            </TouchableOpacity>
-          </View>
+            </>
+          </TouchableHighlight>
 
           <Button
             onPress={handleUpdateProfile}
