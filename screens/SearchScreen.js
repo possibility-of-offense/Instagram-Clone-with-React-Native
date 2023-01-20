@@ -5,7 +5,7 @@ import {
   Image,
   StyleSheet,
   Text,
-  TouchableWithoutFeedback,
+  TouchableOpacity,
   View,
 } from "react-native";
 
@@ -121,10 +121,10 @@ function SearchScreen({ navigation, route }) {
                 renderItem={({ item }) => {
                   return (
                     <View key={item.id} style={styles.listItem}>
-                      <TouchableWithoutFeedback
+                      <TouchableOpacity
                         onPress={() =>
-                          navigation.navigate("Profile", {
-                            screen: "Another User Profile Info",
+                          navigation.navigate("Search", {
+                            screen: "Another User",
                             params: {
                               id: item.id,
                             },
@@ -132,7 +132,7 @@ function SearchScreen({ navigation, route }) {
                         }
                       >
                         <View style={styles.listItemBody}>
-                          {item.image ? (
+                          {item.image && item.image !== "" ? (
                             <Image
                               source={{ uri: item.image }}
                               style={styles.image}
@@ -147,7 +147,7 @@ function SearchScreen({ navigation, route }) {
                             {item.email || item.username}
                           </Text>
                         </View>
-                      </TouchableWithoutFeedback>
+                      </TouchableOpacity>
                     </View>
                   );
                 }}

@@ -12,6 +12,7 @@ import BottomTabItem from "../components/UI/Tab/BottomTabItem";
 import ProfileNavigator from "./ProfileNavigator";
 import SearchScreen from "../screens/SearchScreen";
 import LogoutScreen from "../screens/LogoutScreen";
+import SearchNavigator from "./SearchNavigator";
 
 const Tab = createBottomTabNavigator();
 
@@ -82,24 +83,28 @@ const AppNavigator = () => {
           ),
         }}
       />
+
       <Tab.Screen
-        component={SearchScreen}
+        component={SearchNavigator}
         name="Search"
-        listeners={({ route }) => ({
+        listeners={({ navigation, route }) => ({
           focus: () => {
             setCurrentRoute(route.name);
           },
+          tabPress: (e) =>
+            navigation.jumpTo("Search", { screen: "Search Users" }),
         })}
         options={{
           ...BottomTabItem(
             currentRoute,
             "person-search",
             "Search",
-            "Search",
+            "Explore",
             "material-design"
           ),
         }}
       />
+
       <Tab.Screen
         component={LogoutScreen}
         name="Logout"

@@ -260,6 +260,8 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   tabs: {
+    borderTopColor: colors.lightGrey,
+    borderTopWidth: 0.4,
     flexDirection: "row",
     padding: 10,
     paddingBottom: 15,
