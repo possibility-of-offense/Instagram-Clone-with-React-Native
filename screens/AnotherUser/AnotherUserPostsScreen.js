@@ -97,7 +97,7 @@ function AnotherUserPostsScreen({ navigation, route }) {
   };
   return (
     <SafeAreaView style={styles.container}>
-      {!error && <Text style={styles.error}>{error}</Text>}
+      {error && <Text style={styles.error}>{error}</Text>}
       <FlatList
         data={data}
         keyExtractor={(item) => item.id}

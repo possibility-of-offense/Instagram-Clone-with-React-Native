@@ -112,7 +112,7 @@ function AnotherUserPostDetailsScreen({ navigation, route }) {
     ) {
       return (
         <ScrollView style={styles.container}>
-          {!error && <Text style={styles.error}>{error}</Text>}
+          {error && <Text style={styles.error}>{error}</Text>}
           <Image source={{ uri: postObj.post.image }} style={styles.image} />
           <View style={styles.actions}>
             <View style={styles.likesContainer}>
