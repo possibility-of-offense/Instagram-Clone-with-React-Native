@@ -12,8 +12,6 @@ function LogoutScreen({ navigation }) {
     useCallback(() => {
       signOut(auth)
         .then(() => {
-          navigation.popToTop();
-
           alert(`You just sign out!`);
         })
         .catch((err) => alert(`Couldn't sign out!`));

@@ -22,12 +22,12 @@ import {
 } from "react-native";
 
 // Own Dependencies
-import AppInput from "../components/UI/Input";
-import { AuthContext } from "../context/AuthContext";
-import { db } from "../firebase/config";
-import colors from "../themes/colors";
-import formatDate from "../helpers/formatDate";
-import Loader from "../components/UI/Loader";
+import AppInput from "../../components/UI/Input";
+import { AuthContext } from "../../context/AuthContext";
+import { db } from "../../firebase/config";
+import colors from "../../themes/colors";
+import formatDate from "../../helpers/formatDate";
+import Loader from "../../components/UI/Loader";
 
 function CommentsScreen({ navigation, route }) {
   const { user } = useContext(AuthContext);
@@ -104,7 +104,7 @@ function CommentsScreen({ navigation, route }) {
           />
         ) : (
           <Image
-            source={require("../assets/images/person.jpg")}
+            source={require("../../assets/images/person.jpg")}
             style={styles.userPhoto}
           />
         )}
@@ -141,7 +141,7 @@ function CommentsScreen({ navigation, route }) {
                     ) : (
                       <Image
                         style={styles.image}
-                        source={require("../assets/images/person.jpg")}
+                        source={require("../../assets/images/person.jpg")}
                       />
                     )}
                     <View style={styles.commentBody}>

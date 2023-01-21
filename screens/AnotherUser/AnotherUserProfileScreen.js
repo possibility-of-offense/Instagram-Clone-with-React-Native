@@ -9,19 +9,19 @@ import {
   runTransaction,
   where,
 } from "firebase/firestore";
-import { Dimensions, Image } from "react-native";
+import { Dimensions, Image, TouchableOpacity } from "react-native";
 import React, { useCallback, useContext, useState } from "react";
 import { ScrollView, StyleSheet, Text, Alert, View } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 
 // Own Dependencies
-import { AuthContext } from "../context/AuthContext";
-import Button from "../components/UI/Button";
-import colors from "../themes/colors";
-import { db } from "../firebase/config";
-import Loader from "../components/UI/Loader";
-import pluralizeWord from "../helpers/pluralizeWord";
-import UserProfileTab from "../components/UI/Tab/UserProfileTab";
+import { AuthContext } from "../../context/AuthContext";
+import Button from "../../components/UI/Button";
+import colors from "../../themes/colors";
+import { db } from "../../firebase/config";
+import Loader from "../../components/UI/Loader";
+import pluralizeWord from "../../helpers/pluralizeWord";
+import UserProfileTab from "../../components/UI/Tab/UserProfileTab";
 
 function AnotherUserProfileScreen({ navigation, route }) {
   const { id } = route.params;
@@ -36,6 +36,9 @@ function AnotherUserProfileScreen({ navigation, route }) {
 
   useFocusEffect(
     useCallback(() => {
+      setError(false);
+      setLoading(false);
+
       const fetchUser = async () => {
         setLoading(true);
         try {
@@ -109,7 +112,7 @@ function AnotherUserProfileScreen({ navigation, route }) {
         );
       });
     } catch (error) {
-      console.log(error);
+      setError(`Couldn't follow the user! Try again!`);
     }
   };
 
@@ -128,7 +131,7 @@ function AnotherUserProfileScreen({ navigation, route }) {
               />
             ) : (
               <Image
-                source={require("../assets/images/person.jpg")}
+                source={require("../../assets/images/person.jpg")}
                 style={styles.userInfoImage}
               />
             )}
@@ -215,27 +218,30 @@ function AnotherUserProfileScreen({ navigation, route }) {
                     No posts for the user yet!
                   </Text>
                 )}
-                {/* <View style={styles.postGrid}>
-                {postsData &&
-                Array.isArray(postsData) &&
-                postsData.length > 0 ? (
-                  postsData.map((el, i) => (
-                    <TouchableOpacity
-                      key={el.id}
-                      onPress={() =>
-                        navigation.navigate("Post Details", { id: el.id })
-                      }
-                    >
-                      <Image
-                        source={{ uri: el.image }}
-                        style={[styles.postGridImage]}
-                      />
-                    </TouchableOpacity>
-                  ))
-                ) : (
-                  <Text style={styles.postsHeading}>No posts yet!</Text>
-                )}
-              </View> */}
+                <View style={styles.postGrid}>
+                  {postsOfUser &&
+                  Array.isArray(postsOfUser) &&
+                  postsOfUser.length > 0 ? (
+                    postsOfUser.map((el, i) => (
+                      <TouchableOpacity
+                        key={el.id}
+                        onPress={() =>
+                          navigation.navigate("Search", {
+                            screen: "Another Post Details",
+                            params: { id: el.id, userId: el.userId },
+                          })
+                        }
+                      >
+                        <Image
+                          source={{ uri: el.image }}
+                          style={[styles.postGridImage]}
+                        />
+                      </TouchableOpacity>
+                    ))
+                  ) : (
+                    <Text style={styles.postsHeading}>No posts yet!</Text>
+                  )}
+                </View>
               </>
             )}
           </View>

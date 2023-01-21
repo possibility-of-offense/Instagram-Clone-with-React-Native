@@ -20,13 +20,13 @@ import {
 import { useFocusEffect } from "@react-navigation/native";
 
 // Own Dependecies
-import { AuthContext } from "../context/AuthContext";
-import Button from "../components/UI/Button";
-import colors from "../themes/colors";
-import { db } from "../firebase/config";
-import Loader from "../components/UI/Loader";
-import pluralizeWord from "../helpers/pluralizeWord";
-import UserProfileTab from "../components/UI/Tab/UserProfileTab";
+import { AuthContext } from "../../context/AuthContext";
+import Button from "../../components/UI/Button";
+import colors from "../../themes/colors";
+import { db } from "../../firebase/config";
+import Loader from "../../components/UI/Loader";
+import pluralizeWord from "../../helpers/pluralizeWord";
+import UserProfileTab from "../../components/UI/Tab/UserProfileTab";
 
 // Helpers
 
@@ -95,7 +95,7 @@ function UserProfileScreen({ navigation, route }) {
             <Image source={{ uri: image }} style={styles.userInfoImage} />
           ) : (
             <Image
-              source={require("../assets/images/person.jpg")}
+              source={require("../../assets/images/person.jpg")}
               style={styles.userInfoImage}
             />
           )}

@@ -1,6 +1,6 @@
 import { useFocusEffect } from "@react-navigation/native";
 import { collection, onSnapshot, query, where } from "firebase/firestore";
-import React, { useCallback, useContext, useEffect } from "react";
+import React, { useCallback, useContext } from "react";
 import { SafeAreaView, StyleSheet, Text } from "react-native";
 
 import { Dimensions } from "react-native";

@@ -5,12 +5,11 @@ import Logo from "../components/Logo/Logo";
 import { useState } from "react";
 
 // Own Dependencies
-import AddPostScreen from "../screens/AddPostScreen";
+import AddPostScreen from "../screens/User/AddPostScreen";
 import HomeScreen from "../screens/HomeScreen";
 import colors from "../themes/colors";
 import BottomTabItem from "../components/UI/Tab/BottomTabItem";
 import ProfileNavigator from "./ProfileNavigator";
-import SearchScreen from "../screens/SearchScreen";
 import LogoutScreen from "../screens/LogoutScreen";
 import SearchNavigator from "./SearchNavigator";
 

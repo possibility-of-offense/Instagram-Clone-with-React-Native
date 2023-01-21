@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useCallback, useContext, useState } from "react";
 import {
   FlatList,
   Image,
@@ -21,43 +21,48 @@ import {
 import { Dimensions } from "react-native";
 
 // Own Dependecies
-import { AuthContext } from "../context/AuthContext";
-import colors from "../themes/colors";
-import { db } from "../firebase/config";
+import { AuthContext } from "../../context/AuthContext";
+import colors from "../../themes/colors";
+import { db } from "../../firebase/config";
+import { useFocusEffect } from "@react-navigation/native";
 
 const { height, width } = Dimensions.get("window");
 
-function PostsScreen({ navigation }) {
+function PostsScreen({ navigation, route }) {
   const { user } = useContext(AuthContext);
 
   const [data, setData] = useState([]);
   const [lastVisible, setLastVisible] = useState(null);
+  const [error, setError] = useState(false);
 
-  useEffect(() => {
-    const fetching = async () => {
-      try {
-        const q = query(
-          collection(db, "users", user.uid, "posts"),
-          orderBy("timestamp"),
-          limit(5)
-        );
-        const docs = await getDocs(q);
-        const mappedDocs = docs.docs.map((document) => ({
-          id: document.id,
-          ...document.data(),
-        }));
-        const docSnap = await getDoc(
-          doc(db, "posts", mappedDocs[mappedDocs.length - 1].id)
-        );
+  useFocusEffect(
+    useCallback(() => {
+      const fetching = async () => {
+        setError(false);
+        try {
+          const q = query(
+            collection(db, "users", user.uid, "posts"),
+            orderBy("timestamp"),
+            limit(5)
+          );
+          const docs = await getDocs(q);
+          const mappedDocs = docs.docs.map((document) => ({
+            id: document.id,
+            ...document.data(),
+          }));
+          const docSnap = await getDoc(
+            doc(db, "posts", mappedDocs[mappedDocs.length - 1].id)
+          );
 
-        setLastVisible(docSnap);
-        setData(mappedDocs);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    fetching();
-  }, []);
+          setLastVisible(docSnap);
+          setData(mappedDocs);
+        } catch (error) {
+          setError(`Couldn't get the posts`);
+        }
+      };
+      fetching();
+    }, [route])
+  );
 
   const retrieveMore = async () => {
     try {
@@ -87,11 +92,12 @@ function PostsScreen({ navigation }) {
       setLastVisible(docSnap);
       setData((prev) => prev.concat(mappedDocs));
     } catch (error) {
-      console.log(error);
+      setError(`Couldn't get more posts`);
     }
   };
   return (
     <SafeAreaView style={styles.container}>
+      {!error && <Text style={styles.error}>{error}</Text>}
       <FlatList
         data={data}
         keyExtractor={(item) => item.id}
@@ -129,6 +135,13 @@ const styles = StyleSheet.create({
   description: {
     fontSize: 17,
     padding: 20,
+  },
+  error: {
+    color: "red",
+    fontSize: 18,
+    fontWeight: "bold",
+    marginVertical: 10,
+    textAlign: "center",
   },
   listItem: {
     alignItems: "center",

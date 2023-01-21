@@ -3,15 +3,15 @@ import { StyleSheet } from "react-native";
 
 // Own Dependencies
 import colors from "../themes/colors";
-import AnotherUserProfileScreen from "../screens/AnotherUserProfileScreen";
-import CommentsScreen from "../screens/CommentsScreen";
-import EditUserInfoScreen from "../screens/EditUserInfoScreen";
+import AnotherUserProfileScreen from "../screens/AnotherUser/AnotherUserProfileScreen";
+import CommentsScreen from "../screens/User/CommentsScreen";
+import EditUserInfoScreen from "../screens/User/EditUserInfoScreen";
 import FollowersScreen from "../screens/FollowersScreen";
 import FollowingScreen from "../screens/FollowingScreen";
-import PostDetailsScreen from "../screens/PostDetailsScreen";
+import PostDetailsScreen from "../screens/User/PostDetailsScreen";
 import ProfileHeader from "../components/UI/Header/ProfileHeader";
-import PostsScreen from "../screens/PostsScreen";
-import UserProfileScreen from "../screens/UserProfileScreen";
+import PostsScreen from "../screens/User/PostsScreen";
+import UserProfileScreen from "../screens/User/UserProfileScreen";
 
 const Stack = createNativeStackNavigator();
 

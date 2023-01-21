@@ -18,13 +18,13 @@ import { useIsFocused, useFocusEffect } from "@react-navigation/native";
 
 // Own Dependencies
 
-import { AuthContext } from "../context/AuthContext";
-import AppInput from "../components/UI/Input";
-import Button from "../components/UI/Button";
-import Error from "../components/UI/Error";
-import Loader from "../components/UI/Loader";
-import colors from "../themes/colors";
-import { db, storage } from "../firebase/config";
+import { AuthContext } from "../../context/AuthContext";
+import AppInput from "../../components/UI/Input";
+import Button from "../../components/UI/Button";
+import Error from "../../components/UI/Error";
+import Loader from "../../components/UI/Loader";
+import colors from "../../themes/colors";
+import { db, storage } from "../../firebase/config";
 
 function AddPostScreen(props) {
   const isFocused = useIsFocused();
@@ -133,7 +133,7 @@ function AddPostScreen(props) {
         <>
           <View style={styles.addPostContainer}>
             <Image
-              source={require("../assets/images/person.jpg")}
+              source={require("../../assets/images/person.jpg")}
               style={styles.personImage}
             />
             <View style={styles.textInputContainer}>
