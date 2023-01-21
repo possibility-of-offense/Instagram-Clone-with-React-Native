@@ -34,6 +34,7 @@ function AnotherUserPostDetailsScreen({ navigation, route }) {
     post: null,
     hasLiked: null,
   });
+  const [userObj, setUserObj] = useState({});
 
   const [error, setError] = useState(false);
 
@@ -42,8 +43,6 @@ function AnotherUserPostDetailsScreen({ navigation, route }) {
       setError(false);
       const previousScreen =
         navigation.getState()?.routeNames[navigation.getState().index];
-
-      console.log(navigation.getState());
 
       navigation.setOptions({
         title:
@@ -54,7 +53,7 @@ function AnotherUserPostDetailsScreen({ navigation, route }) {
 
       const fetching = async () => {
         try {
-          const [post, likes] = await Promise.all([
+          const [post, likes, user] = await Promise.all([
             getDoc(doc(db, "users", anotherUser, "posts", route.params.id)),
             getDocs(
               query(
@@ -63,12 +62,14 @@ function AnotherUserPostDetailsScreen({ navigation, route }) {
                 where("postId", "==", route.params.id)
               )
             ),
+            getDoc(doc(db, "users", anotherUser)),
           ]);
 
           setPostObj({
             post: post.data(),
             hasLiked: likes.docs.length > 0 ? true : false,
           });
+          setUserObj(user.data());
         } catch (error) {
           setError(`Couldn't get the post details!`);
         }
@@ -92,9 +93,9 @@ function AnotherUserPostDetailsScreen({ navigation, route }) {
         likes: increment(1),
       });
       await addDoc(collection(db, "likes"), {
-        userId: user.uid,
-        username: user.email || user.displayName,
-        image: user.photoURL || null,
+        userId: anotherUser,
+        username: userObj.email || userObj.displayName,
+        image: userObj.photoURL || null,
         postId: route.params.id,
       });
     } catch (error) {
@@ -141,7 +142,13 @@ function AnotherUserPostDetailsScreen({ navigation, route }) {
 
             <TouchableHighlight
               onPress={() =>
-                navigation.navigate("Comments", { postId: route.params.id })
+                navigation.navigate("Search", {
+                  screen: "Another User Comments",
+                  params: {
+                    userId: anotherUser,
+                    postId: route.params.id,
+                  },
+                })
               }
               style={styles.actionsIcon}
               underlayColor="#ddd"

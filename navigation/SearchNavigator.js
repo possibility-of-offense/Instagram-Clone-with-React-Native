@@ -6,6 +6,7 @@ import AnotherPostDetailsScreen from "../screens/AnotherUser/AnotherUserPostDeta
 import AnotherUserProfileScreen from "../screens/AnotherUser/AnotherUserProfileScreen";
 import AnotherUserPostsScreen from "../screens/AnotherUser/AnotherUserPostsScreen";
 import SearchScreen from "../screens/User/SearchScreen";
+import AnotherUserCommentsScreen from "../screens/AnotherUser/AnotherUserCommentsScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -29,6 +30,10 @@ function SearchNavigator(props) {
       <Stack.Screen
         component={AnotherUserPostsScreen}
         name="Another User Posts"
+      />
+      <Stack.Screen
+        component={AnotherUserCommentsScreen}
+        name="Another User Comments"
       />
     </Stack.Navigator>
   );
