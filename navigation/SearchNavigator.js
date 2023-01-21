@@ -1,10 +1,11 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import React from "react";
-import AnotherPostDetailsScreen from "../screens/AnotherUser/AnotherPostDetailsScreen";
-import AnotherUserProfileScreen from "../screens/AnotherUser/AnotherUserProfileScreen";
 
 // Own Dependencies
-import SearchScreen from "../screens/SearchScreen";
+import AnotherPostDetailsScreen from "../screens/AnotherUser/AnotherUserPostDetailsScreen";
+import AnotherUserProfileScreen from "../screens/AnotherUser/AnotherUserProfileScreen";
+import AnotherUserPostsScreen from "../screens/AnotherUser/AnotherUserPostsScreen";
+import SearchScreen from "../screens/User/SearchScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -24,6 +25,10 @@ function SearchNavigator(props) {
       <Stack.Screen
         component={AnotherPostDetailsScreen}
         name="Another Post Details"
+      />
+      <Stack.Screen
+        component={AnotherUserPostsScreen}
+        name="Another User Posts"
       />
     </Stack.Navigator>
   );

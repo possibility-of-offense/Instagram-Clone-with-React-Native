@@ -27,7 +27,7 @@ import { db } from "../../firebase/config";
 import Loader from "../../components/UI/Loader";
 import pluralizeWord from "../../helpers/pluralizeWord";
 
-function AnotherPostDetailsScreen({ navigation, route }) {
+function AnotherUserPostDetailsScreen({ navigation, route }) {
   let anotherUser = route.params?.userId;
 
   const [postObj, setPostObj] = useState({
@@ -40,7 +40,17 @@ function AnotherPostDetailsScreen({ navigation, route }) {
   useFocusEffect(
     useCallback(() => {
       setError(false);
-      navigation.setOptions({ title: "Back to Profile Page" });
+      const previousScreen =
+        navigation.getState()?.routeNames[navigation.getState().index];
+
+      console.log(navigation.getState());
+
+      navigation.setOptions({
+        title:
+          previousScreen !== "Another User Posts"
+            ? "Back to Profile Page"
+            : "All Posts",
+      });
 
       const fetching = async () => {
         try {
@@ -200,4 +210,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AnotherPostDetailsScreen;
+export default AnotherUserPostDetailsScreen;

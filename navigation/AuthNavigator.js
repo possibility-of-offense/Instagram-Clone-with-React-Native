@@ -2,7 +2,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import React from "react";
 
 // Own Dependencies
-import LoginScreen from "../screens/LoginScreen";
+import LoginScreen from "../screens/Auth/LoginScreen";
 
 const Stack = createNativeStackNavigator();
 

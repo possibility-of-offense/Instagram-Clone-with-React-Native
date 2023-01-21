@@ -4,8 +4,8 @@ import { signOut } from "firebase/auth";
 import { useFocusEffect } from "@react-navigation/native";
 
 // Own Dependencies
-import { auth } from "../firebase/config";
-import Loader from "../components/UI/Loader";
+import { auth } from "../../firebase/config";
+import Loader from "../../components/UI/Loader";
 
 function LogoutScreen({ navigation }) {
   useFocusEffect(

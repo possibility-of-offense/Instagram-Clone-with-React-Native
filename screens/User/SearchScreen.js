@@ -10,12 +10,12 @@ import {
 } from "react-native";
 
 // Own Dependencies
-import AppInput from "../components/UI/Input";
-import { AuthContext } from "../context/AuthContext";
-import { db } from "../firebase/config";
-import Button from "../components/UI/Button";
-import colors from "../themes/colors";
-import Loader from "../components/UI/Loader";
+import AppInput from "../../components/UI/Input";
+import { AuthContext } from "../../context/AuthContext";
+import { db } from "../../firebase/config";
+import Button from "../../components/UI/Button";
+import colors from "../../themes/colors";
+import Loader from "../../components/UI/Loader";
 import { useFocusEffect } from "@react-navigation/native";
 
 function SearchScreen({ navigation, route }) {
@@ -140,7 +140,7 @@ function SearchScreen({ navigation, route }) {
                           ) : (
                             <Image
                               style={styles.image}
-                              source={require("../assets/images/person.jpg")}
+                              source={require("../../assets/images/person.jpg")}
                             />
                           )}
                           <Text style={styles.listItemUsername}>

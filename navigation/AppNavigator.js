@@ -10,7 +10,7 @@ import HomeScreen from "../screens/HomeScreen";
 import colors from "../themes/colors";
 import BottomTabItem from "../components/UI/Tab/BottomTabItem";
 import ProfileNavigator from "./ProfileNavigator";
-import LogoutScreen from "../screens/LogoutScreen";
+import LogoutScreen from "../screens/Auth/LogoutScreen";
 import SearchNavigator from "./SearchNavigator";
 
 const Tab = createBottomTabNavigator();

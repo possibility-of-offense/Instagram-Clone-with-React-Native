@@ -175,7 +175,14 @@ function AnotherUserProfileScreen({ navigation, route }) {
                   <UserProfileTab
                     title={userToFollow?.posts}
                     subTitle="Posts"
-                    onPress={() => navigation.navigate("All Posts")}
+                    onPress={() =>
+                      navigation.navigate("Search", {
+                        screen: "Another User Posts",
+                        params: {
+                          id: userToFollow.userId,
+                        },
+                      })
+                    }
                   />
                   <UserProfileTab
                     onPress={() => {
@@ -199,7 +206,14 @@ function AnotherUserProfileScreen({ navigation, route }) {
                       {pluralizeWord("post", postsOfUser.length, false)}!
                     </Text>
                     <Button
-                      onPress={() => navigation.navigate("All Posts")}
+                      onPress={() =>
+                        navigation.navigate("Search", {
+                          screen: "Another User Posts",
+                          params: {
+                            id: userToFollow.userId,
+                          },
+                        })
+                      }
                       styleObject={{
                         btn: styles.checkAllBtn,
                         btnText: styles.checkAllBtnText,

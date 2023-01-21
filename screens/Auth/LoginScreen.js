@@ -7,13 +7,13 @@ import * as Yup from "yup";
 import { useNetInfo } from "@react-native-community/netinfo";
 
 // Own Dependencies
-import AppInput from "../components/UI/Input";
-import { auth } from "../firebase/config";
-import Button from "../components/UI/Button";
-import colors from "../themes/colors";
-import Logo from "../components/Logo/Logo";
-import Loader from "../components/UI/Loader";
-import Error from "../components/UI/Error";
+import AppInput from "../../components/UI/Input";
+import { auth } from "../../firebase/config";
+import Button from "../../components/UI/Button";
+import colors from "../../themes/colors";
+import Logo from "../../components/Logo/Logo";
+import Loader from "../../components/UI/Loader";
+import Error from "../../components/UI/Error";
 
 // Validation
 const validationSchema = Yup.object().shape({
