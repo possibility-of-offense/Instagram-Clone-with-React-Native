@@ -90,8 +90,6 @@ const AppNavigator = () => {
           focus: () => {
             setCurrentRoute(route.name);
           },
-          tabPress: (e) =>
-            navigation.jumpTo("Search", { screen: "Search Users" }),
         })}
         options={{
           ...BottomTabItem(
@@ -142,3 +140,16 @@ const styles = StyleSheet.create({
 });
 
 export default AppNavigator;
+
+// {"history":
+// [{"key": "Home-OscKjqvfCorl-EewjAfoB", "type": "route"},
+// {"key": "Search--x2NR9pV-sLQs7e2VWqkx", "type": "route"}],
+// "index": 3, "key": "tab-6PSfgJcTIJYZXWCmBWDDy", "routeNames":
+//  ["Home", "Add Post", "Profile", "Search", "Logout"],
+//  "routes":
+//  [{"key": "Home-OscKjqvfCorl-EewjAfoB", "name": "Home", "params": undefined},
+//  {"key": "Add Post-yYxXP_K5uiHSlCUpT4pgS", "name": "Add Post", "params": undefined},
+//  {"key": "Profile-Rt_XNwoD1SPzJlUfq7Pwb", "name": "Profile", "params": [Object], "path": undefined, "state": [Object]},
+//  {"key": "Search--x2NR9pV-sLQs7e2VWqkx", "name": "Search", "params": [Object], "path": undefined, "state": [Object]},
+//  {"key": "Logout-m98vN80XEvoJQcTBbOAuc", "name": "Logout", "params": undefined}],
+//  "stale": false, "type": "tab"}

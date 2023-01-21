@@ -5,12 +5,25 @@ import React from "react";
 import AnotherPostDetailsScreen from "../screens/AnotherUser/AnotherUserPostDetailsScreen";
 import AnotherUserProfileScreen from "../screens/AnotherUser/AnotherUserProfileScreen";
 import AnotherUserPostsScreen from "../screens/AnotherUser/AnotherUserPostsScreen";
-import SearchScreen from "../screens/User/SearchScreen";
 import AnotherUserCommentsScreen from "../screens/AnotherUser/AnotherUserCommentsScreen";
+import FollowerScreen from "../screens/Followers_Following/FollowerScreen";
+import FollowingScreen from "../screens/Followers_Following/FollowingScreen";
+import SearchScreen from "../screens/User/SearchScreen";
 
 const Stack = createNativeStackNavigator();
 
 function SearchNavigator(props) {
+  React.useEffect(() => {
+    const unsubscribe = props.navigation.addListener("tabPress", (e) => {
+      // Prevent default behavior
+      e.preventDefault();
+
+      props.navigation.jumpTo("Search", { screen: "Search Users" });
+    });
+
+    return unsubscribe;
+  }, [props.navigation]);
+
   return (
     <Stack.Navigator>
       <Stack.Screen
@@ -35,6 +48,8 @@ function SearchNavigator(props) {
         component={AnotherUserCommentsScreen}
         name="Another User Comments"
       />
+      <Stack.Screen component={FollowerScreen} name="Followers" />
+      <Stack.Screen component={FollowingScreen} name="Following" />
     </Stack.Navigator>
   );
 }

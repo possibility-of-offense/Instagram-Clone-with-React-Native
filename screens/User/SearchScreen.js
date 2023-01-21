@@ -102,6 +102,7 @@ function SearchScreen({ navigation, route }) {
           btn: styles.searchButton,
           btnText: styles.searchButtonText,
         }}
+        underlayColor={colors.primaryWithoutOpacity}
       />
       <View
         style={[

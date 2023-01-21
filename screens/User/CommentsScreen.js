@@ -110,6 +110,8 @@ function CommentsScreen({ navigation, route }) {
         )}
         <View style={styles.inputContainer}>
           <AppInput
+            autoComplete="off"
+            autoCorrect={false}
             multiline={true}
             onChange={setComment}
             placeholder="Add a comment..."
@@ -234,7 +236,7 @@ const styles = StyleSheet.create({
     paddingRight: 60,
   },
   image: {
-    bordeRadius: 20,
+    borderRadius: 20,
     height: 40,
     width: 40,
   },

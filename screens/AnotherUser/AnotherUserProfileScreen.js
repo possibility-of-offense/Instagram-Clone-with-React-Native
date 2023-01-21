@@ -186,14 +186,24 @@ function AnotherUserProfileScreen({ navigation, route }) {
                   />
                   <UserProfileTab
                     onPress={() => {
-                      navigation.navigate("Followers");
+                      navigation.navigate("Search", {
+                        screen: "Followers",
+                        params: {
+                          userId: id,
+                        },
+                      });
                     }}
                     title={userToFollow?.followers || 0}
                     subTitle="Followers"
                   />
                   <UserProfileTab
                     onPress={() => {
-                      navigation.navigate("Following");
+                      navigation.navigate("Search", {
+                        screen: "Following",
+                        params: {
+                          userId: user.uid,
+                        },
+                      });
                     }}
                     title={userToFollow?.following || 0}
                     subTitle="Following"

@@ -38,7 +38,7 @@ function AnotherUserCommentsScreen({ navigation, route }) {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (error !== "") setError("");
+    if (error !== "") setError(false);
   }, [comment]);
 
   useFocusEffect(
@@ -128,6 +128,8 @@ function AnotherUserCommentsScreen({ navigation, route }) {
         )}
         <View style={styles.inputContainer}>
           <AppInput
+            autoComplete="off"
+            autoCorrect={false}
             multiline={true}
             onChange={setComment}
             placeholder="Add a comment..."

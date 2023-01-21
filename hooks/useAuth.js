@@ -17,7 +17,7 @@ export const useAuth = () => {
       }
       setAuthStateFetching(false);
     });
-  });
+  }, []);
 
   return {
     authStateFetching,
