@@ -48,7 +48,11 @@ function SearchNavigator(props) {
         component={AnotherUserCommentsScreen}
         name="Another User Comments"
       />
-      <Stack.Screen component={FollowerScreen} name="Followers" />
+      <Stack.Screen
+        component={FollowerScreen}
+        name="Followers"
+        options={{ headerShown: false }}
+      />
       <Stack.Screen
         component={FollowingScreen}
         name="Following"

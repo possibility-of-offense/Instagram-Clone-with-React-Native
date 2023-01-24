@@ -129,7 +129,7 @@ function UserProfileScreen({ navigation, route }) {
                 />
                 <UserProfileTab
                   onPress={() => {
-                    navigation.navigate("Search", {
+                    navigation.navigate("Profile", {
                       screen: "Followers",
                       params: {
                         userId: user.uid,
@@ -141,7 +141,7 @@ function UserProfileScreen({ navigation, route }) {
                 />
                 <UserProfileTab
                   onPress={() => {
-                    navigation.navigate("Search", {
+                    navigation.navigate("Profile", {
                       screen: "Following",
                       params: {
                         userId: user.uid,

@@ -7,6 +7,7 @@ import {
   query,
   where,
 } from "firebase/firestore";
+import Constants from "expo-constants";
 import React, { useCallback, useContext, useState } from "react";
 import {
   Image,
@@ -15,6 +16,7 @@ import {
   View,
   FlatList,
   TouchableWithoutFeedback,
+  SafeAreaView,
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 
@@ -86,7 +88,7 @@ function FollowingScreen({ navigation, route }) {
   );
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       {loading ? (
         <Loader visible={true} />
       ) : (
@@ -162,7 +164,7 @@ function FollowingScreen({ navigation, route }) {
           />
         </View>
       )}
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -178,6 +180,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     paddingLeft: 10,
     paddingVertical: 10,
+    paddingTop: Constants.statusBarHeight,
   },
   headerText: {
     fontSize: 18,

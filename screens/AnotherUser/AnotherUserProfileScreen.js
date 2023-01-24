@@ -91,13 +91,28 @@ function AnotherUserProfileScreen({ navigation, route }) {
             userId: userToFollow.id,
             username: userToFollow.username || null,
             email: userToFollow.email,
-            image: userToFollow.image | null,
+            image: userToFollow.image || null,
+          },
+        });
+        await addDoc(collection(db, "followers"), {
+          userId: userToFollow.id,
+          username: userToFollow.username || null,
+          email: userToFollow.email,
+          image: userToFollow.image || null,
+          userFollowing: {
+            userId: user.uid,
+            username: user.email || user.displayName,
+            image: user.photoURL,
           },
         });
 
         transcation.update(doc(db, "users", user.uid), {
           following: increment(1),
         });
+        transcation.update(doc(db, "users", userToFollow.id), {
+          followers: increment(1),
+        });
+        setUserToFollow((prev) => ({ ...prev, followers: prev.followers + 1 }));
         setAlreadyFollowed(true);
 
         Alert.alert(
