@@ -13,6 +13,8 @@ const AppInput = ({
 }) => {
   const inputRef = useRef();
 
+  console.log(error);
+
   useEffect(() => {
     if (toFocus) {
       setTimeout(() => {
@@ -39,7 +41,7 @@ const AppInput = ({
         value={value}
         {...others}
       />
-      {error && visible && <Text style={styles.error}>{error}</Text>}
+      {error && visible && <Text style={styles.error}>Wrong Input Data</Text>}
     </>
   );
 };

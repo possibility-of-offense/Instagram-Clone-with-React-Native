@@ -102,7 +102,7 @@ function AnotherUserProfileScreen({ navigation, route }) {
 
         Alert.alert(
           "User Added",
-          `${userToFollow.username || userToFollow.email} was added!`,
+          `${userToFollow.username || userToFollow.email} have been followed!`,
           [
             {
               text: "OK",
