@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect } from "react";
 import { StyleSheet, View } from "react-native";
 import { signOut } from "firebase/auth";
 import { useFocusEffect } from "@react-navigation/native";
@@ -7,7 +7,24 @@ import { useFocusEffect } from "@react-navigation/native";
 import { auth } from "../../firebase/config";
 import Loader from "../../components/UI/Loader";
 
-function LogoutScreen({ navigation }) {
+function LogoutScreen(props) {
+  useEffect(() => {
+    const unsubscribe = props.navigation.addListener("tabPress", (e) => {
+      // Prevent default behavior
+      e.preventDefault();
+      console.log(5);
+
+      signOut(auth)
+        .then(() => {
+          // props.navigation.jumpTo("Home");
+          alert(`You just sign out!`);
+        })
+        .catch((err) => alert(`Couldn't sign out!`));
+    });
+
+    return unsubscribe;
+  }, [props.navigation]);
+
   useFocusEffect(
     useCallback(() => {
       signOut(auth)

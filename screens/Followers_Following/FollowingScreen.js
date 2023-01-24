@@ -1,19 +1,46 @@
-import React, { useCallback, useState } from "react";
+import { AntDesign } from "@expo/vector-icons";
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  where,
+} from "firebase/firestore";
+import React, { useCallback, useContext, useState } from "react";
 import { Image, Text, StyleSheet, View, FlatList } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
-import { collection, getDocs, query, where } from "firebase/firestore";
 
 // Own Dependencies
+import { AuthContext } from "../../context/AuthContext";
+import Button from "../../components/UI/Button";
+import colors from "../../themes/colors";
 import { db } from "../../firebase/config";
 import Loader from "../../components/UI/Loader";
-import Button from "../../components/UI/Button";
 
 function FollowingScreen({ navigation, route }) {
   const { userId } = route.params;
+  const { user: contextUser } = useContext(AuthContext);
 
+  const [user, setUser] = useState(null);
   const [users, setUsers] = useState([]);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const handleNavigate = () => {
+    if (userId === contextUser.uid) {
+      navigation.navigate("Profile", {
+        screen: "Profile Info",
+      });
+    } else {
+      navigation.navigate("Search", {
+        screen: "Another User",
+        params: {
+          id: userId,
+        },
+      });
+    }
+  };
 
   useFocusEffect(
     useCallback(() => {
@@ -23,9 +50,12 @@ function FollowingScreen({ navigation, route }) {
       const fetching = async () => {
         setLoading(true);
         try {
-          const usersDocs = await getDocs(
-            query(collection(db, "following"), where("userId", "==", userId))
-          );
+          const [usersDocs, userDoc] = await Promise.all([
+            getDocs(
+              query(collection(db, "following"), where("userId", "==", userId))
+            ),
+            getDoc(doc(db, "users", userId)),
+          ]);
 
           setUsers(
             usersDocs.docs.map((user) => ({
@@ -36,6 +66,7 @@ function FollowingScreen({ navigation, route }) {
                 user.data().userToFollow.username,
             }))
           );
+          setUser(userDoc.data());
           setLoading(false);
         } catch (error) {
           setError(`Couldn't get users!`);
@@ -54,6 +85,17 @@ function FollowingScreen({ navigation, route }) {
       ) : (
         <View>
           {error && <Text style={styles.error}>{error}</Text>}
+          <View style={styles.header}>
+            <AntDesign
+              color="black"
+              name="back"
+              onPress={handleNavigate}
+              size={29}
+            />
+            <Text style={styles.headerText}>
+              {user?.username || user?.email} is following:
+            </Text>
+          </View>
           <FlatList
             data={users}
             keyExtractor={(item) => item.id}
@@ -73,9 +115,13 @@ function FollowingScreen({ navigation, route }) {
                       />
                     )}
                   </View>
-                  <Text>{item.username}</Text>
+                  <Text style={styles.username}>{item.username}</Text>
                   <Button
                     title="Check User"
+                    styleObject={{
+                      btn: styles.checkBtn,
+                      btnText: styles.checkBtnText,
+                    }}
                     onPress={() =>
                       navigation.navigate("Search", {
                         screen: "Another User",
@@ -105,6 +151,19 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  header: {
+    alignItems: "center",
+    borderBottomColor: colors.dark,
+    borderBottomWidth: 2,
+    backgroundColor: colors.white,
+    flexDirection: "row",
+    paddingLeft: 10,
+    paddingVertical: 10,
+  },
+  headerText: {
+    fontSize: 18,
+    marginLeft: 16,
+  },
   error: {
     color: "red",
     fontWeight: "bold",
@@ -124,6 +183,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "row",
     padding: 10,
+  },
+  username: {
+    fontWeight: "bold",
+    marginHorizontal: 10,
+  },
+  checkBtn: {
+    backgroundColor: colors.primary,
+    marginLeft: "auto",
+  },
+  checkBtnText: {
+    color: colors.white,
   },
 });
 

@@ -25,8 +25,16 @@ const ProfileNavigator = () => {
     >
       <Stack.Screen component={UserProfileScreen} name="Profile Info" />
       <Stack.Screen component={PostsScreen} name="All Posts" />
-      <Stack.Screen component={FollowersScreen} name="Followers" />
-      <Stack.Screen component={FollowingScreen} name="Following" />
+      <Stack.Screen
+        component={FollowersScreen}
+        name="Followers"
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        component={FollowingScreen}
+        name="Following"
+        options={{ headerShown: false }}
+      />
       <Stack.Screen component={EditUserInfoScreen} name="Edit Profile" />
       <Stack.Screen component={PostDetailsScreen} name="Post Details" />
       <Stack.Screen component={CommentsScreen} name="Comments" />

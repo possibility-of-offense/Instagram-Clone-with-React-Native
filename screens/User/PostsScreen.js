@@ -25,6 +25,7 @@ import { AuthContext } from "../../context/AuthContext";
 import colors from "../../themes/colors";
 import { db } from "../../firebase/config";
 import { useFocusEffect } from "@react-navigation/native";
+import Button from "../../components/UI/Button";
 
 const { height, width } = Dimensions.get("window");
 
@@ -97,7 +98,7 @@ function PostsScreen({ navigation, route }) {
   };
   return (
     <SafeAreaView style={styles.container}>
-      {!error && <Text style={styles.error}>{error}</Text>}
+      {error && <Text style={styles.error}>{error}</Text>}
       <FlatList
         data={data}
         keyExtractor={(item) => item.id}
@@ -108,9 +109,16 @@ function PostsScreen({ navigation, route }) {
           >
             <View>
               <Image source={{ uri: item.image }} style={styles.image} />
-              <Text style={styles.description}>
-                {item.description.split(" ").slice(0, 10).join(" ")}
-              </Text>
+              <Button
+                onPress={() =>
+                  navigation.navigate("Post Details", { id: item.id })
+                }
+                styleObject={{
+                  btn: styles.seePostBtn,
+                  btnText: styles.seePostBtnText,
+                }}
+                title="See Post"
+              />
             </View>
           </TouchableWithoutFeedback>
         )}
@@ -132,10 +140,6 @@ const styles = StyleSheet.create({
     paddingBottom: 90,
     width: width,
   },
-  description: {
-    fontSize: 17,
-    padding: 20,
-  },
   error: {
     color: "red",
     fontSize: 18,
@@ -151,6 +155,16 @@ const styles = StyleSheet.create({
   image: {
     width: "100%",
     height: 500,
+  },
+  seePostBtn: {
+    alignSelf: "center",
+    backgroundColor: colors.primary,
+    marginVertical: 15,
+    marginLeft: 15,
+    width: "50%",
+  },
+  seePostBtnText: {
+    color: colors.white,
   },
 });
 

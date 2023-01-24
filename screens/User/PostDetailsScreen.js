@@ -101,8 +101,8 @@ function PostDetailsScreen({ navigation, route }) {
     ) {
       return (
         <ScrollView style={styles.container}>
-          {!error && <Text style={styles.error}>{error}</Text>}
-          <Image source={{ uri: postObj.post.image }} style={styles.image} />
+          {error && <Text style={styles.error}>{error}</Text>}
+          <Image source={{ uri: postObj?.post?.image }} style={styles.image} />
           <View style={styles.actions}>
             <View style={styles.likesContainer}>
               {!postObj.hasLiked ? (
@@ -125,7 +125,7 @@ function PostDetailsScreen({ navigation, route }) {
                   />
                 </View>
               )}
-              <Text>{pluralizeWord("Like", postObj.post.likes)}</Text>
+              <Text>{pluralizeWord("Like", postObj?.post?.likes)}</Text>
             </View>
 
             <TouchableHighlight
@@ -142,12 +142,12 @@ function PostDetailsScreen({ navigation, route }) {
                   color="black"
                 />
                 <Text style={styles.commentsContainerText}>
-                  {pluralizeWord("Comment", postObj.post.comments)}
+                  {pluralizeWord("Comment", postObj?.post?.comments)}
                 </Text>
               </View>
             </TouchableHighlight>
           </View>
-          <Text style={styles.description}>{postObj.post.description}</Text>
+          <Text style={styles.description}>{postObj?.post?.description}</Text>
         </ScrollView>
       );
     } else {

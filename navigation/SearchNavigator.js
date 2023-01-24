@@ -49,7 +49,11 @@ function SearchNavigator(props) {
         name="Another User Comments"
       />
       <Stack.Screen component={FollowerScreen} name="Followers" />
-      <Stack.Screen component={FollowingScreen} name="Following" />
+      <Stack.Screen
+        component={FollowingScreen}
+        name="Following"
+        options={{ headerShown: false }}
+      />
     </Stack.Navigator>
   );
 }
