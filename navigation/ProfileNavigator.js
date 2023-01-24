@@ -1,3 +1,4 @@
+import React, { useEffect } from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { StyleSheet } from "react-native";
 
@@ -15,7 +16,18 @@ import UserProfileScreen from "../screens/User/UserProfileScreen";
 
 const Stack = createNativeStackNavigator();
 
-const ProfileNavigator = () => {
+const ProfileNavigator = (props) => {
+  useEffect(() => {
+    const unsubscribe = props.navigation.addListener("tabPress", (e) => {
+      // Prevent default behavior
+      e.preventDefault();
+
+      props.navigation.jumpTo("Profile", { screen: "Profile Info" });
+    });
+
+    return unsubscribe;
+  }, [props.navigation]);
+
   return (
     <Stack.Navigator
       screenOptions={{

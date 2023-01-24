@@ -105,63 +105,67 @@ function FollowingScreen({ navigation, route }) {
               {user?.username || user?.email} is following:
             </Text>
           </View>
-          <FlatList
-            data={users}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => {
-              return (
-                <TouchableWithoutFeedback
-                  onPress={() =>
-                    navigation.navigate("Search", {
-                      screen: "Another User",
-                      params: {
-                        id: item.id,
-                      },
-                    })
-                  }
-                >
-                  <View key={item.id} style={styles.user}>
-                    <View style={styles.imageContainer}>
-                      {item.image ? (
-                        <Image
-                          source={{ uri: item.image }}
-                          style={styles.image}
-                        />
-                      ) : (
-                        <Image
-                          source={require("../../assets/images/person.jpg")}
-                          style={styles.image}
-                        />
-                      )}
+          {users.length > 0 ? (
+            <FlatList
+              data={users}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => {
+                return (
+                  <TouchableWithoutFeedback
+                    onPress={() =>
+                      navigation.navigate("Search", {
+                        screen: "Another User",
+                        params: {
+                          id: item.id,
+                        },
+                      })
+                    }
+                  >
+                    <View key={item.id} style={styles.user}>
+                      <View style={styles.imageContainer}>
+                        {item.image ? (
+                          <Image
+                            source={{ uri: item.image }}
+                            style={styles.image}
+                          />
+                        ) : (
+                          <Image
+                            source={require("../../assets/images/person.jpg")}
+                            style={styles.image}
+                          />
+                        )}
+                      </View>
+                      <Text style={styles.username}>{item.username}</Text>
+                      <Button
+                        onPress={() =>
+                          navigation.navigate("Search", {
+                            screen: "Another User",
+                            params: {
+                              id: item.id,
+                            },
+                          })
+                        }
+                        title="Check User"
+                        styleObject={{
+                          btn: styles.checkBtn,
+                          btnText: styles.checkBtnText,
+                        }}
+                        underlayColor={colors.primaryWithoutOpacity}
+                      />
                     </View>
-                    <Text style={styles.username}>{item.username}</Text>
-                    <Button
-                      onPress={() =>
-                        navigation.navigate("Search", {
-                          screen: "Another User",
-                          params: {
-                            id: item.id,
-                          },
-                        })
-                      }
-                      title="Check User"
-                      styleObject={{
-                        btn: styles.checkBtn,
-                        btnText: styles.checkBtnText,
-                      }}
-                      underlayColor={colors.primaryWithoutOpacity}
-                    />
-                  </View>
-                </TouchableWithoutFeedback>
-              );
-            }}
-            ItemSeparatorComponent={() => (
-              <View
-                style={{ borderBottomWidth: 1, borderBottomColor: "#ddd" }}
-              />
-            )}
-            onEndReachedThreshold={0}
-          />
+                  </TouchableWithoutFeedback>
+                );
+              }}
+              ItemSeparatorComponent={() => (
+                <View
+                  style={{ borderBottomWidth: 1, borderBottomColor: "#ddd" }}
+                />
+              )}
+              onEndReachedThreshold={0}
+            />
+          ) : (
+            <Text style={styles.backupMsg}>No one is being following!</Text>
+          )}
         </View>
       )}
     </SafeAreaView>
@@ -169,6 +173,10 @@ function FollowingScreen({ navigation, route }) {
 }
 
 const styles = StyleSheet.create({
+  backupMsg: {
+    fontSize: 17,
+    padding: 6,
+  },
   container: {
     flex: 1,
   },
