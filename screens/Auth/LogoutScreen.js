@@ -1,50 +1,52 @@
-import React, { useCallback, useEffect } from "react";
-import { StyleSheet, View } from "react-native";
+import React, { useState } from "react";
+import { Button, StyleSheet, Text, View } from "react-native";
 import { signOut } from "firebase/auth";
-import { useFocusEffect } from "@react-navigation/native";
 
 // Own Dependencies
 import { auth } from "../../firebase/config";
 import Loader from "../../components/UI/Loader";
+import { AuthContext } from "../../context/AuthContext";
 
 function LogoutScreen(props) {
-  useEffect(() => {
-    const unsubscribe = props.navigation.addListener("tabPress", (e) => {
-      // Prevent default behavior
-      e.preventDefault();
-      console.log(5);
+  const [loading, setLoading] = useState(false);
 
-      signOut(auth)
-        .then(() => {
-          // props.navigation.jumpTo("Home");
-          alert(`You just sign out!`);
-        })
-        .catch((err) => alert(`Couldn't sign out!`));
-    });
+  const handleLogout = async () => {
+    setLoading(true);
+    try {
+      setLoading(false);
 
-    return unsubscribe;
-  }, [props.navigation]);
-
-  useFocusEffect(
-    useCallback(() => {
-      signOut(auth)
-        .then(() => {
-          alert(`You just sign out!`);
-        })
-        .catch((err) => alert(`Couldn't sign out!`));
-    }, [])
-  );
+      await signOut(auth);
+      alert(`You just sign out`);
+    } catch (error) {
+      setLoading(false);
+      alert(`Couldn't logout!`);
+    }
+  };
 
   return (
     <View style={styles.container}>
-      <Loader visible={true} />
+      <Text style={styles.text}>Are you sure you want to sign out?</Text>
+      <View style={styles.btnContainer}>
+        <Button onPress={handleLogout} title="Logout" />
+      </View>
+      {loading && <Loader visible={true} />}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  btnContainer: {
+    alignSelf: "center",
+    width: "60%",
+  },
   container: {
     flex: 1,
+  },
+  text: {
+    fontSize: 17,
+    marginVertical: 10,
+    padding: 10,
+    textAlign: "center",
   },
 });
 
