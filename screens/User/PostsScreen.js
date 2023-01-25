@@ -31,12 +31,8 @@ import PostsHOC from "./PostsHOC";
 
 const { height, width } = Dimensions.get("window");
 
-function PostsScreen({ navigation, route }) {
+function PostsScreen({ route }) {
   const { user } = useContext(AuthContext);
-
-  const [data, setData] = useState([]);
-  const [lastVisible, setLastVisible] = useState(null);
-  const [error, setError] = useState(false);
 
   const [postsState, setPostsState] = useState({
     error: false,
@@ -93,7 +89,7 @@ function PostsScreen({ navigation, route }) {
       const q = query(
         collection(db, "posts"),
         orderBy("timestamp"),
-        startAfter(lastVisible),
+        startAfter(postsState.lastVisible),
         limit(5)
       );
 
@@ -126,45 +122,6 @@ function PostsScreen({ navigation, route }) {
     }
   };
   return (
-    // <SafeAreaView style={styles.container}>
-    //   {error && <Text style={styles.error}>{error}</Text>}
-    //   <FlatList
-    //     data={data}
-    //     keyExtractor={(item) => item.id}
-    //     renderItem={({ item }) => (
-    //       <TouchableWithoutFeedback
-    //         onPress={() => navigation.navigate("Post Details", { id: item.id })}
-    //         style={styles.listItem}
-    //       >
-    //         <View>
-    //           <Image source={{ uri: item.image }} style={styles.image} />
-    //           <Button
-    //             onPress={() =>
-    //               navigation.navigate("Post Details", { id: item.id })
-    //             }
-    //             styleObject={{
-    //               btn: styles.seePostBtn,
-    //               btnText: styles.seePostBtnText,
-    //             }}
-    //             title="See Post"
-    //           />
-    //         </View>
-    //       </TouchableWithoutFeedback>
-    //     )}
-    //     ItemSeparatorComponent={() => <View />}
-    //     ListHeaderComponent={() => {
-    //       <Text style={styles.headerText}>Items</Text>;
-    //     }}
-    //     onEndReached={retrieveMore}
-    //     onEndReachedThreshold={0}
-    //   />
-    // </SafeAreaView>
-    // <LazyLoadListItems
-    //   data={data}
-    //   error={error}
-    //   styles={styles}
-    //   retrieveMore={retrieveMore}
-    // />
     <PostsHOC
       error={postsState.error}
       loading={postsState.loading}
@@ -198,6 +155,7 @@ const styles = StyleSheet.create({
     width: "100%",
     height: 500,
   },
+
   seePostBtn: {
     alignSelf: "center",
     backgroundColor: colors.primary,
@@ -205,6 +163,7 @@ const styles = StyleSheet.create({
     marginLeft: 15,
     width: "50%",
   },
+  seePostBtnUnderlay: { color: colors.primaryWithoutOpacity },
   seePostBtnText: {
     color: colors.white,
   },

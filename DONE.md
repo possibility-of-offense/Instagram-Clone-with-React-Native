@@ -1,5 +1,6 @@
 # Done Refactoring
 
 AddPostScreen.js
-UserProfileScreen
+UserProfileScreen -> UserProfileHOC
 EditUserInfoScreen
+PostsScreen -> PostsHOC

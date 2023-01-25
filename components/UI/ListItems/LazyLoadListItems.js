@@ -1,3 +1,4 @@
+import { useNavigation } from "@react-navigation/native";
 import React from "react";
 import {
   SafeAreaView,
@@ -13,6 +14,8 @@ import Button from "../Button";
 import Loader from "../Loader";
 
 function LazyLoadListItems({ data, error, loading, styles, retrieveMore }) {
+  const navigation = useNavigation();
+
   return (
     <SafeAreaView style={styles.container}>
       {loading && (
@@ -23,7 +26,7 @@ function LazyLoadListItems({ data, error, loading, styles, retrieveMore }) {
             top: 0,
             width: "100%",
             bottom: 0,
-            backgroundColor: "rgba(0, 0, 0, 0.6)",
+            backgroundColor: "rgba(0, 0, 0, 0.3)",
             zIndex: 10,
           }}
         >
@@ -50,6 +53,7 @@ function LazyLoadListItems({ data, error, loading, styles, retrieveMore }) {
                   btnText: styles.seePostBtnText,
                 }}
                 title="See Post"
+                underlayColor={styles.seePostBtnUnderlay}
               />
             </View>
           </TouchableWithoutFeedback>
