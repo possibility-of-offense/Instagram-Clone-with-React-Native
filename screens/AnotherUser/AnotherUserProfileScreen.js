@@ -22,6 +22,7 @@ import { db } from "../../firebase/config";
 import Loader from "../../components/UI/Loader";
 import pluralizeWord from "../../helpers/pluralizeWord";
 import UserProfileTab from "../../components/UI/Tab/UserProfileTab";
+import UserProfileHOC from "../User/UserProfileHOC";
 
 function AnotherUserProfileScreen({ navigation, route }) {
   const { id } = route.params;
@@ -131,163 +132,167 @@ function AnotherUserProfileScreen({ navigation, route }) {
     }
   };
 
-  return (
-    <ScrollView>
-      {loading ? (
-        <Loader visible={true} />
-      ) : (
-        <View style={styles.container}>
-          {error && <Text style={styles.error}>{error}</Text>}
-          <View style={styles.userInfoContainer}>
-            {userToFollow?.image ? (
-              <Image
-                source={{ uri: userToFollow?.image }}
-                style={styles.userInfoImage}
-              />
-            ) : (
-              <Image
-                source={require("../../assets/images/person.jpg")}
-                style={styles.userInfoImage}
-              />
-            )}
-            <View style={styles.userInfoNameContainer}>
-              <Text style={styles.userInfoName}>
-                {userToFollow?.username || userToFollow?.email}
-              </Text>
-              {!alreadyFollowed ? (
-                <Button
-                  onPress={handleFollow}
-                  title="Follow"
-                  styleObject={{
-                    btn: styles.followBtn,
-                    btnText: styles.followBtnText,
-                  }}
-                  underlayColor={colors.primaryWithoutOpacity}
-                />
-              ) : (
-                <Button
-                  disabled={true}
-                  styleObject={{
-                    btn: styles.alreadyFollowedBtn,
-                    btnText: styles.alreadyFollowedBtnText,
-                  }}
-                  title="Already followed"
-                />
-              )}
-              {userToFollow?.bio && (
-                <Text style={{ marginTop: 10 }}>{userToFollow?.bio}</Text>
-              )}
-            </View>
-          </View>
-          <View style={styles.postGridContainer}>
-            {loading ? (
-              <View style={styles.loaderContainer}>
-                <Loader visible={true} />
-              </View>
-            ) : (
-              <>
-                <View style={styles.tabs}>
-                  <UserProfileTab
-                    title={userToFollow?.posts}
-                    subTitle="Posts"
-                    onPress={() =>
-                      navigation.navigate("Search", {
-                        screen: "Another User Posts",
-                        params: {
-                          id: userToFollow.userId,
-                        },
-                      })
-                    }
-                  />
-                  <UserProfileTab
-                    onPress={() => {
-                      navigation.navigate("Profile", {
-                        screen: "Followers",
-                        params: {
-                          userId: id,
-                        },
-                      });
-                    }}
-                    title={userToFollow?.followers || 0}
-                    subTitle="Followers"
-                  />
-                  <UserProfileTab
-                    onPress={() => {
-                      navigation.navigate("Profile", {
-                        screen: "Following",
-                        params: {
-                          userId: id,
-                        },
-                      });
-                    }}
-                    title={userToFollow?.following || 0}
-                    subTitle="Following"
-                  />
-                </View>
-                {Array.isArray(postsOfUser) && postsOfUser.length > 0 ? (
-                  <View style={styles.checkAllBtnContainer}>
-                    <Text style={styles.postsHeading}>
-                      {postsOfUser.length} most recent{" "}
-                      {pluralizeWord("post", postsOfUser.length, false)}!
-                    </Text>
-                    <Button
-                      onPress={() =>
-                        navigation.navigate("Search", {
-                          screen: "Another User Posts",
-                          params: {
-                            id: userToFollow.userId,
-                          },
-                        })
-                      }
-                      styleObject={{
-                        btn: styles.checkAllBtn,
-                        btnText: styles.checkAllBtnText,
-                      }}
-                      title="Check All Posts"
-                      underlayColor={colors.primaryWithoutOpacity}
-                    />
-                  </View>
-                ) : (
-                  <Text
-                    style={[
-                      styles.postGridContainer,
-                      { textAlign: "center", paddingTop: 10, width: "100%" },
-                    ]}
-                  >
-                    No posts for the user yet!
-                  </Text>
-                )}
-                <View style={styles.postGrid}>
-                  {postsOfUser &&
-                  Array.isArray(postsOfUser) &&
-                  postsOfUser.length > 0 ? (
-                    postsOfUser.map((el, i) => (
-                      <TouchableOpacity
-                        key={el.id}
-                        onPress={() =>
-                          navigation.navigate("Search", {
-                            screen: "Another Post Details",
-                            params: { id: el.id, userId: el.userId },
-                          })
-                        }
-                      >
-                        <Image
-                          source={{ uri: el.image }}
-                          style={[styles.postGridImage]}
-                        />
-                      </TouchableOpacity>
-                    ))
-                  ) : (
-                    <Text style={styles.postsHeading}>No posts yet!</Text>
-                  )}
-                </View>
-              </>
-            )}
-          </View>
-        </View>
-      )}
-    </ScrollView>
-  );
+  return null;
+  // return (
+  //   // <UserProfileHOC
+
+  //   // />
+  //   // <ScrollView>
+  //   //   {loading ? (
+  //   //     <Loader visible={true} />
+  //   //   ) : (
+  //   //     <View style={styles.container}>
+  //   //       {error && <Text style={styles.error}>{error}</Text>}
+  //   //       <View style={styles.userInfoContainer}>
+  //   //         {userToFollow?.image ? (
+  //   //           <Image
+  //   //             source={{ uri: userToFollow?.image }}
+  //   //             style={styles.userInfoImage}
+  //   //           />
+  //   //         ) : (
+  //   //           <Image
+  //   //             source={require("../../assets/images/person.jpg")}
+  //   //             style={styles.userInfoImage}
+  //   //           />
+  //   //         )}
+  //   //         <View style={styles.userInfoNameContainer}>
+  //   //           <Text style={styles.userInfoName}>
+  //   //             {userToFollow?.username || userToFollow?.email}
+  //   //           </Text>
+  //   //           {!alreadyFollowed ? (
+  //   //             <Button
+  //   //               onPress={handleFollow}
+  //   //               title="Follow"
+  //   //               styleObject={{
+  //   //                 btn: styles.followBtn,
+  //   //                 btnText: styles.followBtnText,
+  //   //               }}
+  //   //               underlayColor={colors.primaryWithoutOpacity}
+  //   //             />
+  //   //           ) : (
+  //   //             <Button
+  //   //               disabled={true}
+  //   //               styleObject={{
+  //   //                 btn: styles.alreadyFollowedBtn,
+  //   //                 btnText: styles.alreadyFollowedBtnText,
+  //   //               }}
+  //   //               title="Already followed"
+  //   //             />
+  //   //           )}
+  //   //           {userToFollow?.bio && (
+  //   //             <Text style={{ marginTop: 10 }}>{userToFollow?.bio}</Text>
+  //   //           )}
+  //   //         </View>
+  //   //       </View>
+  //   //       <View style={styles.postGridContainer}>
+  //   //         {loading ? (
+  //   //           <View style={styles.loaderContainer}>
+  //   //             <Loader visible={true} />
+  //   //           </View>
+  //   //         ) : (
+  //   //           <>
+  //   //             <View style={styles.tabs}>
+  //   //               <UserProfileTab
+  //   //                 title={userToFollow?.posts}
+  //   //                 subTitle="Posts"
+  //   //                 onPress={() =>
+  //   //                   navigation.navigate("Search", {
+  //   //                     screen: "Another User Posts",
+  //   //                     params: {
+  //   //                       id: userToFollow.userId,
+  //   //                     },
+  //   //                   })
+  //   //                 }
+  //   //               />
+  //   //               <UserProfileTab
+  //   //                 onPress={() => {
+  //   //                   navigation.navigate("Profile", {
+  //   //                     screen: "Followers",
+  //   //                     params: {
+  //   //                       userId: id,
+  //   //                     },
+  //   //                   });
+  //   //                 }}
+  //   //                 title={userToFollow?.followers || 0}
+  //   //                 subTitle="Followers"
+  //   //               />
+  //   //               <UserProfileTab
+  //   //                 onPress={() => {
+  //   //                   navigation.navigate("Profile", {
+  //   //                     screen: "Following",
+  //   //                     params: {
+  //   //                       userId: id,
+  //   //                     },
+  //   //                   });
+  //   //                 }}
+  //   //                 title={userToFollow?.following || 0}
+  //   //                 subTitle="Following"
+  //   //               />
+  //   //             </View>
+  //   //             {Array.isArray(postsOfUser) && postsOfUser.length > 0 ? (
+  //   //               <View style={styles.checkAllBtnContainer}>
+  //   //                 <Text style={styles.postsHeading}>
+  //   //                   {postsOfUser.length} most recent{" "}
+  //   //                   {pluralizeWord("post", postsOfUser.length, false)}!
+  //   //                 </Text>
+  //   //                 <Button
+  //   //                   onPress={() =>
+  //   //                     navigation.navigate("Search", {
+  //   //                       screen: "Another User Posts",
+  //   //                       params: {
+  //   //                         id: userToFollow.userId,
+  //   //                       },
+  //   //                     })
+  //   //                   }
+  //   //                   styleObject={{
+  //   //                     btn: styles.checkAllBtn,
+  //   //                     btnText: styles.checkAllBtnText,
+  //   //                   }}
+  //   //                   title="Check All Posts"
+  //   //                   underlayColor={colors.primaryWithoutOpacity}
+  //   //                 />
+  //   //               </View>
+  //   //             ) : (
+  //   //               <Text
+  //   //                 style={[
+  //   //                   styles.postGridContainer,
+  //   //                   { textAlign: "center", paddingTop: 10, width: "100%" },
+  //   //                 ]}
+  //   //               >
+  //   //                 No posts for the user yet!
+  //   //               </Text>
+  //   //             )}
+  //   //             <View style={styles.postGrid}>
+  //   //               {postsOfUser &&
+  //   //               Array.isArray(postsOfUser) &&
+  //   //               postsOfUser.length > 0 ? (
+  //   //                 postsOfUser.map((el, i) => (
+  //   //                   <TouchableOpacity
+  //   //                     key={el.id}
+  //   //                     onPress={() =>
+  //   //                       navigation.navigate("Search", {
+  //   //                         screen: "Another Post Details",
+  //   //                         params: { id: el.id, userId: el.userId },
+  //   //                       })
+  //   //                     }
+  //   //                   >
+  //   //                     <Image
+  //   //                       source={{ uri: el.image }}
+  //   //                       style={[styles.postGridImage]}
+  //   //                     />
+  //   //                   </TouchableOpacity>
+  //   //                 ))
+  //   //               ) : (
+  //   //                 <Text style={styles.postsHeading}>No posts yet!</Text>
+  //   //               )}
+  //   //             </View>
+  //   //           </>
+  //   //         )}
+  //   //       </View>
+  //   //     </View>
+  //   //   )}
+  //   // </ScrollView>
+  // );
 }
 
 const styles = StyleSheet.create({

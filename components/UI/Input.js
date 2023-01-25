@@ -39,7 +39,7 @@ const AppInput = ({
         value={value}
         {...others}
       />
-      {error && visible && <Text style={styles.error}>Wrong Input Data</Text>}
+      {error && visible && <Text style={styles.error}>{error}</Text>}
     </>
   );
 };

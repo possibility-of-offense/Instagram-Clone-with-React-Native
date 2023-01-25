@@ -21,6 +21,13 @@ import { useFocusEffect } from "@react-navigation/native";
 function SearchScreen({ navigation, route }) {
   const { user } = useContext(AuthContext);
 
+  const [searchTerm, setSearchTerm] = useState("");
+  const [users, setUsers] = useState([]);
+
+  const [foundResults, setFoundResults] = useState(true);
+  const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(false);
+
   const [searchState, setSearchState] = useState({
     error: false,
     foundResults: true,
@@ -38,28 +45,30 @@ function SearchScreen({ navigation, route }) {
         searchTerm: "",
         users: [],
       }));
+      // setError(false);
+      // setFoundResults(true);
+      // setLoading(false);
+      // setSearchTerm("");
+      // setUsers([]);
     }, [route])
   );
 
   useEffect(() => {
-    if (searchState.searchTerm !== "") {
-      setSearchState((prev) => ({
-        ...prev,
-        error: false,
-        foundResults: true,
-        loading: false,
-      }));
+    if (searchTerm !== "") {
+      setError(false);
+      setLoading(false);
+      setFoundResults(true);
     }
-  }, [searchState.searchTerm]);
+  }, [searchTerm]);
 
   const handleSearch = async () => {
-    if (searchState.searchTerm === "") {
-      return setSearchState((prev) => ({
-        ...prev,
-        error: `Fill the input first!`,
-      }));
+    if (searchTerm === "") {
+      return setError("Fill the input first!");
     }
-    setSearchState((prev) => ({ ...prev, loading: true, error: false }));
+
+    setLoading(true);
+    setSearchTerm("");
+
     try {
       const searchResults = await getDocs(collection(db, "users"));
       const mappedSearchResults = searchResults.docs.map((document) => ({
@@ -70,7 +79,7 @@ function SearchScreen({ navigation, route }) {
       const foundUsers = [];
       mappedSearchResults.forEach((userObj) => {
         if (
-          userObj.email.includes(searchState.searchTerm) &&
+          userObj.email.includes(searchTerm) &&
           !userObj.userId.includes(user.uid)
         ) {
           foundUsers.push(userObj);
@@ -78,42 +87,28 @@ function SearchScreen({ navigation, route }) {
       });
 
       if (foundUsers.length > 0) {
-        setSearchState((prev) => ({
-          ...prev,
-          users: foundUsers,
-          loading: false,
-          error: false,
-        }));
+        setUsers(foundUsers);
       } else {
-        setSearchState((prev) => ({
-          ...prev,
-          foundResults: false,
-          loading: false,
-          error: false,
-          users: [],
-        }));
+        setFoundResults(false);
       }
+
+      setLoading(false);
     } catch (error) {
-      setSearchState((prev) => ({
-        ...prev,
-        loading: false,
-        error: `The user is not existing! Try another one!`,
-      }));
+      setError("The user is not existing! Try another one!");
+      setLoading(false);
     }
   };
 
   return (
     <View style={styles.container}>
       <AppInput
-        error={searchState.error}
-        onChange={(searchTerm) =>
-          setSearchState((prev) => ({ ...prev, searchTerm }))
-        }
+        error={error}
+        onChange={setSearchTerm}
         placeholder="Search for people..."
         placeholderTextColor={colors.dark}
         styleObj={styles.searchInput}
-        value={searchState.searchTerm}
-        visible={searchState.error}
+        value={searchTerm}
+        visible={error}
       />
       <Button
         onPress={handleSearch}
@@ -126,19 +121,18 @@ function SearchScreen({ navigation, route }) {
       />
       <View
         style={[
-          !searchState.loading &&
-          (searchState.users.length > 0 || !searchState.foundResults)
+          !loading && (users.length > 0 || !foundResults)
             ? styles.searchResultsContainer
             : { height: 250 },
         ]}
       >
-        {searchState.loading ? (
+        {loading ? (
           <Loader visible={true} />
         ) : (
           <>
-            {searchState.foundResults ? (
+            {foundResults ? (
               <FlatList
-                data={searchState.users}
+                data={users}
                 keyExtractor={(item) => item.id}
                 renderItem={({ item }) => {
                   return (
