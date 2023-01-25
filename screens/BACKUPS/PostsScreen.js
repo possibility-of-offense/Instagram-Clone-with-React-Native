@@ -27,7 +27,6 @@ import { db } from "../../firebase/config";
 import { useFocusEffect } from "@react-navigation/native";
 import Button from "../../components/UI/Button";
 import LazyLoadListItems from "../../components/UI/ListItems/LazyLoadListItems";
-import PostsHOC from "./PostsHOC";
 
 const { height, width } = Dimensions.get("window");
 
@@ -38,19 +37,10 @@ function PostsScreen({ navigation, route }) {
   const [lastVisible, setLastVisible] = useState(null);
   const [error, setError] = useState(false);
 
-  const [postsState, setPostsState] = useState({
-    error: false,
-    loading: false,
-    lastVisible: null,
-    posts: [],
-    user: {},
-  });
-
   useFocusEffect(
     useCallback(() => {
       const fetching = async () => {
-        setPostsState((prev) => ({ ...prev, loading: true, error: false }));
-
+        setError(false);
         try {
           const q = query(
             collection(db, "users", user.uid, "posts"),
@@ -66,18 +56,10 @@ function PostsScreen({ navigation, route }) {
             doc(db, "posts", mappedDocs[mappedDocs.length - 1].id)
           );
 
-          setPostsState((prev) => ({
-            ...prev,
-            loading: false,
-            lastVisible: docSnap,
-            posts: mappedDocs,
-          }));
+          setLastVisible(docSnap);
+          setData(mappedDocs);
         } catch (error) {
-          setPostsState((prev) => ({
-            ...prev,
-            error: `Couldn't get the posts`,
-            loading: false,
-          }));
+          setError(`Couldn't get the posts`);
         }
       };
       fetching();
@@ -86,10 +68,8 @@ function PostsScreen({ navigation, route }) {
 
   const retrieveMore = async () => {
     try {
-      if (!postsState.lastVisible || !postsState.lastVisible.exists())
-        return null;
+      if (!lastVisible || !lastVisible.exists()) return null;
 
-      setPostsState((prev) => ({ ...prev, loading: true, error: false }));
       const q = query(
         collection(db, "posts"),
         orderBy("timestamp"),
@@ -111,18 +91,10 @@ function PostsScreen({ navigation, route }) {
         doc(db, "posts", mappedDocs[mappedDocs.length - 1].id)
       );
 
-      setPostsState((prev) => ({
-        ...prev,
-        loading: false,
-        lastVisible: docSnap,
-        posts: mappedDocs,
-      }));
+      setLastVisible(docSnap);
+      setData((prev) => prev.concat(mappedDocs));
     } catch (error) {
-      setPostsState((prev) => ({
-        ...prev,
-        error: `Couldn't get the posts`,
-        loading: false,
-      }));
+      setError(`Couldn't get more posts`);
     }
   };
   return (
@@ -159,17 +131,10 @@ function PostsScreen({ navigation, route }) {
     //     onEndReachedThreshold={0}
     //   />
     // </SafeAreaView>
-    // <LazyLoadListItems
-    //   data={data}
-    //   error={error}
-    //   styles={styles}
-    //   retrieveMore={retrieveMore}
-    // />
-    <PostsHOC
-      error={postsState.error}
-      loading={postsState.loading}
+    <LazyLoadListItems
+      data={data}
+      error={error}
       styles={styles}
-      posts={postsState.posts}
       retrieveMore={retrieveMore}
     />
   );

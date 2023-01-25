@@ -1,13 +1,6 @@
 import { Dimensions } from "react-native";
 import React, { useCallback, useContext, useState } from "react";
-import {
-  Image,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { StyleSheet } from "react-native";
 import {
   collection,
   query,
@@ -27,16 +20,8 @@ import UserProfileHOC from "./UserProfileHOC";
 
 // Helpers
 
-function UserProfileScreen({ navigation, route }) {
+function UserProfileScreen({ route }) {
   const { user } = useContext(AuthContext);
-
-  const [postsData, setPostsData] = useState([]);
-
-  const [userData, setUserData] = useState({});
-  const [image, setImage] = useState("");
-
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(false);
 
   const [userState, setUserState] = useState({
     error: false,
@@ -56,7 +41,7 @@ function UserProfileScreen({ navigation, route }) {
         try {
           const userDoc = await getDoc(doc(db, "users", user.uid));
           if (userDoc.exists()) {
-            setUserState((prev) => ({ ...prev, useData: userDoc.data() }));
+            setUserState((prev) => ({ ...prev, userData: userDoc.data() }));
           }
           const q = query(
             collection(db, "users", user.uid, "posts"),
@@ -103,7 +88,7 @@ function UserProfileScreen({ navigation, route }) {
       postsData={userState.posts}
       showEdit={true}
       user={user}
-      userData={userState.user}
+      userData={userState.userData}
     />
   );
 }

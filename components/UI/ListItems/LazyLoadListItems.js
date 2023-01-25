@@ -1,6 +1,5 @@
 import React from "react";
 import {
-  StyleSheet,
   SafeAreaView,
   Text,
   FlatList,
@@ -11,10 +10,26 @@ import {
 
 // Own Dependencies
 import Button from "../Button";
+import Loader from "../Loader";
 
-function LazyLoadListItems({ data, error, styles, retrieveMore }) {
+function LazyLoadListItems({ data, error, loading, styles, retrieveMore }) {
   return (
     <SafeAreaView style={styles.container}>
+      {loading && (
+        <View
+          style={{
+            flex: 1,
+            position: "absolute",
+            top: 0,
+            width: "100%",
+            bottom: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.6)",
+            zIndex: 10,
+          }}
+        >
+          <Loader visible={true} />
+        </View>
+      )}
       {error && <Text style={styles.error}>{error}</Text>}
       <FlatList
         data={data}
@@ -25,7 +40,7 @@ function LazyLoadListItems({ data, error, styles, retrieveMore }) {
             style={styles.listItem}
           >
             <View>
-              <Image source={{ uri: item.image }} style={styles.image} />
+              <Image source={{ uri: item.postImage }} style={styles.image} />
               <Button
                 onPress={() =>
                   navigation.navigate("Post Details", { id: item.id })
@@ -49,7 +64,5 @@ function LazyLoadListItems({ data, error, styles, retrieveMore }) {
     </SafeAreaView>
   );
 }
-
-// const styles = StyleSheet.create({});
 
 export default LazyLoadListItems;

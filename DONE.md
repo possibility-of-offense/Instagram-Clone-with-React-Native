@@ -2,3 +2,4 @@
 
 AddPostScreen.js
 UserProfileScreen
+EditUserInfoScreen

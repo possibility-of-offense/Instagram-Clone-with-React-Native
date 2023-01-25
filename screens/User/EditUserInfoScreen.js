@@ -61,8 +61,6 @@ function EditUserInfoScreen({ navigation, route }) {
           const userObj = await getDoc(doc(db, "users", user.uid));
           const userObjData = userObj.exists() ? userObj.data() : null;
 
-          console.log(userObjData);
-
           setEditState({
             loading: false,
             error: false,

@@ -29,6 +29,8 @@ function UserProfileHOC({
 }) {
   const navigation = useNavigation();
 
+  console.log(userData);
+
   return (
     <ScrollView>
       <View style={styles.container}>
