@@ -41,7 +41,9 @@ function UserProfileHOC({
             <Text style={styles.userInfoName}>
               {user?.displayName || user?.username || user.email}
             </Text>
-            {handleFollow && !alreadyFollowed ? (
+            {handleFollow ? (
+              // prettier-ignore
+              !alreadyFollowed ? (
               <Button
                 onPress={handleFollow}
                 title="Follow"
@@ -60,7 +62,8 @@ function UserProfileHOC({
                 }}
                 title="Already followed"
               />
-            )}
+            )
+            ) : null}
 
             {userData?.bio && (
               <Text style={{ marginTop: 10 }}>{userData?.bio}</Text>

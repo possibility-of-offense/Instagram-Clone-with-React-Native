@@ -7,3 +7,4 @@ PostsScreen -> PostsHOC
 PostDetailsScreen -> PostDetailsHOC
 CommentsScreen -> CommentsHOC
 SearchScreen
+AnotherUserProfileScreen

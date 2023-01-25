@@ -35,13 +35,13 @@ function LogoutScreen({ navigation }) {
       setLoading(false);
 
       await signOut(auth);
-      // navigation.dispatch(
-      //   CommonActions.reset({
-      //     index: 0,
-      //     routes: [{ name: "Home" }],
-      //   })
-      // );
-      // TabActions.jumpTo("Login");
+      const resetAction = NavigationActions.reset({
+        index: 0,
+        actions: [],
+        key: null,
+      });
+
+      navigation.dispatch(resetAction);
 
       alert(`You just sign out`);
     } catch (error) {
