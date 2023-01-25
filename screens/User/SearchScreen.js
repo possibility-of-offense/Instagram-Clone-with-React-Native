@@ -94,6 +94,7 @@ function SearchScreen({ navigation, route }) {
         }));
       }
     } catch (error) {
+      console.log(error);
       setSearchState((prev) => ({
         ...prev,
         loading: false,

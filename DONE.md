@@ -6,3 +6,4 @@ EditUserInfoScreen
 PostsScreen -> PostsHOC
 PostDetailsScreen -> PostDetailsHOC
 CommentsScreen -> CommentsHOC
+SearchScreen

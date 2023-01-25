@@ -19,16 +19,17 @@ import UserImage from "../../components/UI/UserImage";
 import UserProfileTab from "../../components/UI/Tab/UserProfileTab";
 
 function UserProfileHOC({
+  alreadyFollowed = null,
   error,
   image,
   loading,
+  handleFollow = null,
   postsData,
   showEdit,
   user,
   userData,
 }) {
   const navigation = useNavigation();
-
 
   return (
     <ScrollView>
@@ -38,8 +39,29 @@ function UserProfileHOC({
           <UserImage image={image} styles={styles.userInfoImage} />
           <View style={styles.userInfoNameContainer}>
             <Text style={styles.userInfoName}>
-              {user.displayName || user.username || user.email}
+              {user?.displayName || user?.username || user.email}
             </Text>
+            {handleFollow && !alreadyFollowed ? (
+              <Button
+                onPress={handleFollow}
+                title="Follow"
+                styleObject={{
+                  btn: styles.followBtn,
+                  btnText: styles.followBtnText,
+                }}
+                underlayColor={colors.primaryWithoutOpacity}
+              />
+            ) : (
+              <Button
+                disabled={true}
+                styleObject={{
+                  btn: styles.alreadyFollowedBtn,
+                  btnText: styles.alreadyFollowedBtnText,
+                }}
+                title="Already followed"
+              />
+            )}
+
             {userData?.bio && (
               <Text style={{ marginTop: 10 }}>{userData?.bio}</Text>
             )}
@@ -141,6 +163,13 @@ function UserProfileHOC({
 }
 
 const styles = StyleSheet.create({
+  alreadyFollowedBtn: {
+    backgroundColor: colors.grey,
+    marginTop: 15,
+  },
+  alreadyFollowedBtnText: {
+    color: colors.dark,
+  },
   container: {
     backgroundColor: colors.white,
     flex: 1,
@@ -180,6 +209,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: "center",
     paddingTop: 15,
+  },
+  followBtn: {
+    backgroundColor: colors.primary,
+    marginTop: 10,
+  },
+  followBtnText: {
+    color: colors.white,
   },
   loaderContainer: {
     width: "100%",
