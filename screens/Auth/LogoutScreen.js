@@ -1,15 +1,33 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button, StyleSheet, Text, View } from "react-native";
 import { signOut } from "firebase/auth";
 
-import { TabActions } from "@react-navigation/native";
+import { CommonActions, TabActions } from "@react-navigation/native";
 
 // Own Dependencies
 import { auth } from "../../firebase/config";
 import Loader from "../../components/UI/Loader";
 
-function LogoutScreen(props) {
+function LogoutScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("tabPress", (e) => {
+      // Prevent default behavior
+      e.preventDefault();
+
+      TabActions.replace("Logout", "Home");
+
+      // navigation.dispatch(
+      //   CommonActions.reset({
+      //     index: getLogoutRoute,
+      //     routes: [{ name: "Home" }],
+      //   })
+      // );
+    });
+
+    return unsubscribe;
+  }, [navigation]);
 
   const handleLogout = async () => {
     setLoading(true);
@@ -17,7 +35,13 @@ function LogoutScreen(props) {
       setLoading(false);
 
       await signOut(auth);
-      TabActions.jumpTo("Login");
+      // navigation.dispatch(
+      //   CommonActions.reset({
+      //     index: 0,
+      //     routes: [{ name: "Home" }],
+      //   })
+      // );
+      // TabActions.jumpTo("Login");
 
       alert(`You just sign out`);
     } catch (error) {

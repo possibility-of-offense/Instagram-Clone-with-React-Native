@@ -42,7 +42,6 @@ const handleAddPost = async ({ navigation, post, setPost, user }) => {
     userPostImageRef = ref(storage, `users/${user.uid}/${id}/postImage`);
 
     uploadBytes(userPostImageRef, blob).then((snapshot) => {
-      console.log(snapshot);
       getDownloadURL(userPostImageRef)
         .then((url) => {
           return addDoc(collection(db, "users", user.uid, "posts"), {

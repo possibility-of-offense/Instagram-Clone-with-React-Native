@@ -7,55 +7,76 @@ import {
   orderBy,
   query,
   serverTimestamp,
-  Timestamp,
   updateDoc,
   where,
 } from "firebase/firestore";
-import React, { useContext, useEffect, useState } from "react";
-import {
-  Dimensions,
-  FlatList,
-  Image,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import React, { useCallback, useContext, useEffect, useState } from "react";
+import { Dimensions, StyleSheet } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 
 // Own Dependencies
-import AppInput from "../../components/UI/Input";
 import { AuthContext } from "../../context/AuthContext";
 import { db } from "../../firebase/config";
 import colors from "../../themes/colors";
-import formatDate from "../../helpers/formatDate";
-import Loader from "../../components/UI/Loader";
+import CommentsHOC from "./CommentsHOC";
 
 function CommentsScreen({ navigation, route }) {
   const { user } = useContext(AuthContext);
-  const [comment, setComment] = useState("");
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [commentsState, setCommentsState] = useState({
+    comment: "",
+    comments: [],
+    error: false,
+    loading: false,
+  });
 
   useEffect(() => {
-    if (error !== "") setError("");
-  }, [comment]);
+    if (commentsState.error !== "")
+      setCommentsState((prev) => ({ ...prev, error: false }));
+  }, [commentsState.comment]);
+
+  useFocusEffect(
+    useCallback(() => {
+      const unsub = onSnapshot(
+        query(
+          collection(db, "comments"),
+          where("postId", "==", route.params.postId),
+          orderBy("timestamp", "desc")
+        ),
+        (snapshot) => {
+          setCommentsState((prev) => ({
+            ...prev,
+            comments: snapshot.docs.map((document) => ({
+              id: document.id,
+              ...document.data(),
+            })),
+          }));
+        }
+      );
+
+      return () => unsub();
+    }, [route])
+  );
 
   // Add comment
   const handleAddComment = async () => {
-    if (comment === "") return setError("Fill the input");
+    if (commentsState.comment === "")
+      return setCommentsState((prev) => ({
+        ...prev,
+        error: "Fill the input first!",
+      }));
 
-    setLoading(true);
-    setComment("");
+    setCommentsState((prev) => ({ ...prev, loading: true }));
 
     try {
       await addDoc(collection(db, "comments"), {
         userId: user.uid,
-        username: user.email || user.displayName,
+        username: user.displayName || user.email || null,
         image: user.photoURL || null,
         postId: route.params.postId,
         timestamp: serverTimestamp(),
         likes: 0,
-        commentBody: comment,
+        commentBody: commentsState.comment,
       });
 
       await updateDoc(
@@ -65,110 +86,29 @@ function CommentsScreen({ navigation, route }) {
         }
       );
 
-      setLoading(false);
+      setCommentsState((prev) => ({ ...prev, loading: false, comment: "" }));
     } catch (error) {
-      setLoading(false);
+      setCommentsState((prev) => ({
+        ...prev,
+        loading: false,
+        error: "Error occurred! Try again!",
+      }));
     }
   };
 
-  const [comments, setComments] = useState([]);
-  useEffect(() => {
-    const unsub = onSnapshot(
-      query(
-        collection(db, "comments"),
-        where("postId", "==", route.params.postId),
-        orderBy("timestamp", "desc")
-      ),
-      (snapshot) => {
-        setComments(
-          snapshot.docs.map((document) => ({
-            id: document.id,
-            ...document.data(),
-          }))
-        );
-      }
-    );
-
-    return () => unsub();
-  }, []);
-
   return (
-    <View style={styles.container}>
-      <View style={styles.commentForm}>
-        {user.photoURL ? (
-          <Image
-            source={{
-              uri: user.photoURL,
-            }}
-            style={styles.userPhoto}
-          />
-        ) : (
-          <Image
-            source={require("../../assets/images/person.jpg")}
-            style={styles.userPhoto}
-          />
-        )}
-        <View style={styles.inputContainer}>
-          <AppInput
-            autoComplete="off"
-            autoCorrect={false}
-            multiline={true}
-            onChange={setComment}
-            placeholder="Add a comment..."
-            styleObj={styles.input}
-            value={comment}
-          />
-          <Text onPress={handleAddComment} style={styles.addBtn}>
-            Post
-          </Text>
-        </View>
-        {error && <Text style={styles.errorMsg}>{error}</Text>}
-      </View>
-      <View style={styles.commentsGrid}>
-        {loading ? (
-          <Loader visible={true} />
-        ) : (
-          <FlatList
-            data={comments}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => {
-              return (
-                <View key={item.id} style={styles.listItem}>
-                  <View style={styles.listItemBody}>
-                    {item.image ? (
-                      <Image
-                        source={{ uri: item.image }}
-                        style={styles.image}
-                      />
-                    ) : (
-                      <Image
-                        style={styles.image}
-                        source={require("../../assets/images/person.jpg")}
-                      />
-                    )}
-                    <View style={styles.commentBody}>
-                      <Text style={styles.commentBodyText}>
-                        <Text style={styles.commentBodyUsername}>
-                          {item.username}
-                        </Text>{" "}
-                        {item.commentBody}
-                      </Text>
-                    </View>
-                  </View>
-                  <Text style={styles.date}>{formatDate(item.timestamp)}</Text>
-                </View>
-              );
-            }}
-            ItemSeparatorComponent={() => (
-              <View
-                style={{ borderBottomWidth: 1, borderBottomColor: "#ddd" }}
-              />
-            )}
-            onEndReachedThreshold={0}
-          />
-        )}
-      </View>
-    </View>
+    <CommentsHOC
+      comment={commentsState.comment}
+      comments={commentsState.comments}
+      error={commentsState.error}
+      handleAddComment={handleAddComment}
+      loading={commentsState.loading}
+      setComment={(comment) =>
+        setCommentsState((prev) => ({ ...prev, comment }))
+      }
+      styles={styles}
+      user={user}
+    />
   );
 }
 
