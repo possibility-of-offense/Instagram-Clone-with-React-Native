@@ -1,19 +1,7 @@
 import React, { useCallback, useContext, useState } from "react";
-import {
-  addDoc,
-  collection,
-  doc,
-  increment,
-  serverTimestamp,
-  updateDoc,
-} from "firebase/firestore";
-import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
-import { Image, View, StyleSheet, TouchableOpacity } from "react-native";
+import { Image, View, StyleSheet, TouchableOpacity, Text } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import { MaterialIcons } from "@expo/vector-icons";
-import "react-native-get-random-values";
-import { nanoid } from "nanoid";
-import * as ImagePicker from "expo-image-picker";
 import { useIsFocused, useFocusEffect } from "@react-navigation/native";
 
 // Own Dependencies
@@ -21,134 +9,70 @@ import { useIsFocused, useFocusEffect } from "@react-navigation/native";
 import { AuthContext } from "../../context/AuthContext";
 import AppInput from "../../components/UI/Input";
 import Button from "../../components/UI/Button";
-import Error from "../../components/UI/Error";
-import Loader from "../../components/UI/Loader";
 import colors from "../../themes/colors";
-import { db, storage } from "../../firebase/config";
+import Error from "../../components/UI/Error";
+import handleAddPost from "./helpers/addPost";
+import Loader from "../../components/UI/Loader";
+import useImagePick from "../../hooks/useImagePick";
+import UserImage from "../../components/UI/UserImage";
 
-function AddPostScreen(props) {
-  const isFocused = useIsFocused();
-
-  const [image, setImage] = useState(null);
-  const [description, setDescription] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(false);
-
+function AddPostScreen({ navigation, route }) {
   const { user } = useContext(AuthContext);
 
-  const [focusInp, setFocusInp] = useState(false);
+  const [post, setPost] = useState({
+    description: "",
+    focusInp: false,
+    error: false,
+    image: null,
+    loading: false,
+  });
 
+  // Custom Hook
+  const { pickImage } = useImagePick({
+    setImage: (image) => setPost((prev) => ({ ...prev, image })),
+  });
+
+  // Clear Data when navigate here
+  const isFocused = useIsFocused();
   useFocusEffect(
     useCallback(() => {
-      setDescription("");
-      setFocusInp(true);
-      setError(false);
-
-      return () => {
-        setFocusInp(false);
-      };
-    }, [props.route.params, isFocused])
+      setPost({
+        description: "",
+        focusInp: true,
+        error: false,
+        image: null,
+        loading: false,
+      });
+    }, [route.params, isFocused])
   );
-
-  const pickImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: true,
-      base64: true,
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      setImage(result.assets[0].uri);
-    }
-  };
-
-  // // Handle publish post
-  const handlePost = async () => {
-    const id = await nanoid();
-
-    if (!image || description === "") {
-      setError("Fill the inputs first!");
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      let userPostImageRef;
-
-      const blob = await new Promise((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.onload = function () {
-          resolve(xhr.response);
-        };
-        xhr.onerror = function () {
-          reject(new TypeError("Network request failed"));
-        };
-        xhr.responseType = "blob";
-        xhr.open("GET", image, true);
-        xhr.send(null);
-      });
-      userPostImageRef = ref(storage, `users/${user.uid}/${id}/postImage`);
-      uploadBytes(userPostImageRef, blob).then((snapshot) => {
-        getDownloadURL(userPostImageRef)
-          .then((url) => {
-            return addDoc(collection(db, "users", user.uid, "posts"), {
-              userId: user.uid,
-              description,
-              image: url,
-              timestamp: serverTimestamp(),
-              likes: 0,
-              comments: 0,
-              popular: false,
-            })
-              .then((data) => {
-                updateDoc(doc(db, "users", user.uid), {
-                  posts: increment(1),
-                })
-                  .then(() => {
-                    setDescription(null);
-                    setImage(null);
-                    setLoading(false);
-                    props.navigation.navigate("Profile", {
-                      screen: "All Posts",
-                      // postAdded: true,
-                      // Test if removal breaks anything - it shouldn't
-                    });
-                  })
-                  .catch((err) => setError(`Couldn't add document!`));
-              })
-              .catch((err) => setError(`Couldn't add document!`));
-          })
-          .catch((err) => setError(`Couldn't upload image!`));
-      });
-    } catch (error) {
-      setError(`Couldn't upload image!`);
-    }
-  };
 
   return (
     <View style={styles.container}>
-      {!loading && (
+      {!post.loading && (
         <>
           <View style={styles.addPostContainer}>
-            <Image
-              source={require("../../assets/images/person.jpg")}
-              style={styles.personImage}
-            />
+            <UserImage image={user.photoURL} styles={styles.personImage} />
+
             <View style={styles.textInputContainer}>
               <AppInput
                 multiline={true}
-                onChange={setDescription}
+                onChange={(description) =>
+                  setPost((prev) => ({ ...prev, description }))
+                }
                 styleObj={styles.textInput}
-                toFocus={focusInp}
+                toFocus={post.focusInp}
                 placeholder="Enter description"
-                value={description}
+                value={post.description}
               />
-              {image ? (
+
+              {post.image ? (
                 <View style={styles.imageContainer}>
-                  <Image style={styles.image} source={{ uri: image }} />
-                  <TouchableOpacity onPress={() => setImage(null)}>
+                  <Image style={styles.image} source={{ uri: post.image }} />
+                  <TouchableOpacity
+                    onPress={() =>
+                      setPost((prev) => ({ ...prev, image: null }))
+                    }
+                  >
                     <FontAwesome name="remove" size={24} color={colors.dark} />
                   </TouchableOpacity>
                 </View>
@@ -164,20 +88,25 @@ function AddPostScreen(props) {
             </View>
           </View>
           <Button
-            disabled={loading}
-            onPress={handlePost}
+            disabled={post.loading}
+            onPress={handleAddPost.bind(null, {
+              navigation,
+              post,
+              setPost,
+              user,
+            })}
             title="Post"
             styleObject={{ btn: styles.btn, btnText: styles.btnText }}
             underlayColor={colors.primaryWithoutOpacity}
           />
         </>
       )}
-      {loading && <Loader visible={loading} />}
-      <View style={styles.errorContainer}>
-        {!loading && error && (
-          <Error error={error} styleObj={styles.errorText} />
-        )}
-      </View>
+      {post.loading && <Loader visible={post.loading} />}
+      {!post.loading && post.error && (
+        <View style={styles.errorContainer}>
+          <Error error={post.error} styleObj={styles.errorText} />
+        </View>
+      )}
     </View>
   );
 }

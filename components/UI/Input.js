@@ -13,8 +13,6 @@ const AppInput = ({
 }) => {
   const inputRef = useRef();
 
-  console.log(error);
-
   useEffect(() => {
     if (toFocus) {
       setTimeout(() => {

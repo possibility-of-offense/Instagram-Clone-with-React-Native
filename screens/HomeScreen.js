@@ -1,9 +1,26 @@
 import { useFocusEffect } from "@react-navigation/native";
-import { collection, onSnapshot, query, where } from "firebase/firestore";
-import React, { useCallback, useContext } from "react";
-import { SafeAreaView, StyleSheet, Text } from "react-native";
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  onSnapshot,
+  query,
+  runTransaction,
+  updateDoc,
+  where,
+} from "firebase/firestore";
+import React, { useCallback, useContext, useEffect, useState } from "react";
+import {
+  Modal,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+} from "react-native";
 
 import { Dimensions } from "react-native";
+import UserToFollowModal from "../components/UI/Modal/UserToFollowModal";
 import { AuthContext } from "../context/AuthContext";
 import { db } from "../firebase/config";
 
@@ -14,34 +31,93 @@ const { height, width } = Dimensions.get("window");
 
 function HomeScreen({ navigation, route }) {
   const { user } = useContext(AuthContext);
-  let anotherUser;
 
-  if (route.params) {
-    if (user.uid !== route.params?.id) {
-      anotherUser = route.params.id;
-    } else {
-      anotherUser = user.uid;
+  const [showModal, setShowModal] = useState(false);
+
+  const [followingState, setFollowingState] = useState({
+    error: false,
+    followingUsers: [],
+    homeScreenFollowingUser: null,
+    isThereAnyFollowings: true,
+    loading: false,
+  });
+
+  const [following, setFollowing] = useState([]);
+  const [homeFollowing, setHomeFollowing] = useState({});
+
+  useEffect(() => {
+    if (Object.values(homeFollowing).length > 0) {
+      updateDoc(doc(db, "users", user.uid), {
+        homeFollowing,
+      })
+        .then((d) => d)
+        .catch((err) => console.log(err));
     }
-  } else {
-    anotherUser = user.uid;
-  }
+  }, [homeFollowing]);
 
   useFocusEffect(
     useCallback(() => {
-      onSnapshot(
-        query(collection(db, "following"), where("userId", "==", user.uid)),
-        (snapshot) => {
-          snapshot.docs.forEach((d) => {
-            console.log(d.data());
+      const fetching = async () => {
+        try {
+          await runTransaction(db, async (transcation) => {
+            // REFACTOR
+            const followingDocs = await getDocs(
+              query(
+                collection(db, "following"),
+                where("userToFollow.userId", "==", user.uid)
+              )
+            );
+
+            if (followingDocs.docs.length > 0) {
+              setFollowingState((prev) => ({
+                ...prev,
+                isThereAnyFollowings: false,
+              }));
+            }
           });
+          // const followings = await getDocs(
+          //   query(
+          //     collection(db, "following"),
+          //     where("userToFollow.userId", "==", user.uid)
+          //   )
+          // );
+
+          // const mapped = followings.docs.map((d) => ({
+          //   id: d.id,
+          //   userId: d.data().userId,
+          //   user: {
+          //     id: d.data().userToFollow.userId,
+          //     username:
+          //       d.data().userToFollow.username || d.data().userToFollow.email,
+          //   },
+          // }));
+          // setFollowing(mapped);
+        } catch (error) {
+          console.log(error);
         }
-      );
+      };
+      fetching();
     }, [route])
   );
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.text}>Home</Text>
+      {following.length > 0 ? (
+        <TouchableOpacity onPress={() => setShowModal(true)}>
+          <Text>Show Modal</Text>
+        </TouchableOpacity>
+      ) : (
+        <Text style={styles.text}>No users which have been followed!</Text>
+      )}
+      {!followingState.isThereAnyFollowings && <Text>Test</Text>}
+      {/* <UserToFollowModal
+        modalActions={{
+          showModal,
+          setShowModal,
+        }}
+        following={following}
+        setHomeFollowing={setHomeFollowing}
+      /> */}
     </SafeAreaView>
   );
 }
@@ -53,8 +129,8 @@ const styles = StyleSheet.create({
     width: width,
   },
   text: {
-    fontSize: 20,
-    padding: 10,
+    fontSize: 18,
+    marginTop: 10,
     textAlign: "center",
   },
 });

@@ -21,12 +21,9 @@ import { useFocusEffect } from "@react-navigation/native";
 
 // Own Dependecies
 import { AuthContext } from "../../context/AuthContext";
-import Button from "../../components/UI/Button";
 import colors from "../../themes/colors";
 import { db } from "../../firebase/config";
-import Loader from "../../components/UI/Loader";
-import pluralizeWord from "../../helpers/pluralizeWord";
-import UserProfileTab from "../../components/UI/Tab/UserProfileTab";
+import UserProfileHOC from "./UserProfileHOC";
 
 // Helpers
 
@@ -41,19 +38,26 @@ function UserProfileScreen({ navigation, route }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
 
+  const [userState, setUserState] = useState({
+    error: false,
+    loading: false,
+    posts: [],
+    userData: {},
+    userImage: "",
+  });
+
   useFocusEffect(
     useCallback(() => {
-      setImage(user.photoURL);
+      setUserState((prev) => ({ ...prev, image: user.photoURL }));
 
       const fetchData = async () => {
-        setLoading(true);
+        setUserState((prev) => ({ ...prev, loading: true }));
 
         try {
           const userDoc = await getDoc(doc(db, "users", user.uid));
           if (userDoc.exists()) {
-            setUserData(userDoc.data());
+            setUserState((prev) => ({ ...prev, useData: userDoc.data() }));
           }
-
           const q = query(
             collection(db, "users", user.uid, "posts"),
             limit(6),
@@ -67,19 +71,24 @@ function UserProfileScreen({ navigation, route }) {
                 id: document.id,
                 ...document.data(),
               }));
-              setPostsData(mapped);
-              setLoading(false);
+              setUserState((prev) => ({
+                ...prev,
+                posts: mapped,
+                loading: false,
+              }));
             },
             (error) => {
               setError("Error while getting posts!");
               setLoading(false);
             }
           );
-
           return () => unsub();
         } catch (error) {
-          setError("Error while getting users info!");
-          setLoading(false);
+          setUserState((prev) => ({
+            ...prev,
+            error: "Error while getting users info!",
+            loading: true,
+          }));
         }
       };
       fetchData();
@@ -87,114 +96,15 @@ function UserProfileScreen({ navigation, route }) {
   );
 
   return (
-    <ScrollView>
-      <View style={styles.container}>
-        {error && <Text style={styles.error}>{error}</Text>}
-        <View style={styles.userInfoContainer}>
-          {image ? (
-            <Image source={{ uri: image }} style={styles.userInfoImage} />
-          ) : (
-            <Image
-              source={require("../../assets/images/person.jpg")}
-              style={styles.userInfoImage}
-            />
-          )}
-          <View style={styles.userInfoNameContainer}>
-            <Text style={styles.userInfoName}>
-              {user.displayName || user.email}
-            </Text>
-            {userData?.bio && (
-              <Text style={{ marginTop: 10 }}>{userData?.bio}</Text>
-            )}
-            <Button
-              onPress={() => navigation.navigate("Edit Profile")}
-              styleObject={{ btn: styles.editBtn, btnText: styles.editBtnText }}
-              title="Edit Profile"
-              underlayColor={colors.lightGrey}
-            />
-          </View>
-        </View>
-        <View style={styles.postGridContainer}>
-          {loading ? (
-            <View style={styles.loaderContainer}>
-              <Loader visible={true} />
-            </View>
-          ) : (
-            <>
-              <View style={styles.tabs}>
-                <UserProfileTab
-                  title={postsData.length}
-                  subTitle="Posts"
-                  onPress={() => navigation.navigate("All Posts")}
-                />
-                <UserProfileTab
-                  onPress={() => {
-                    navigation.navigate("Profile", {
-                      screen: "Followers",
-                      params: {
-                        userId: user.uid,
-                      },
-                    });
-                  }}
-                  title={userData?.followers || 0}
-                  subTitle="Followers"
-                />
-                <UserProfileTab
-                  onPress={() => {
-                    navigation.navigate("Profile", {
-                      screen: "Following",
-                      params: {
-                        userId: user.uid,
-                      },
-                    });
-                  }}
-                  title={userData?.following || 0}
-                  subTitle="Following"
-                />
-              </View>
-              {Array.isArray(postsData) && postsData.length > 0 && (
-                <View style={styles.checkAllBtnContainer}>
-                  <Text style={styles.postsHeading}>
-                    {postsData.length} most recent{" "}
-                    {pluralizeWord("post", postsData.length, false)}!
-                  </Text>
-                  <Button
-                    onPress={() => navigation.navigate("All Posts")}
-                    styleObject={{
-                      btn: styles.checkAllBtn,
-                      btnText: styles.checkAllBtnText,
-                    }}
-                    title="Check All Posts"
-                    underlayColor={colors.primaryWithoutOpacity}
-                  />
-                </View>
-              )}
-              <View style={styles.postGrid}>
-                {postsData &&
-                Array.isArray(postsData) &&
-                postsData.length > 0 ? (
-                  postsData.map((el, i) => (
-                    <TouchableOpacity
-                      key={el.id}
-                      onPress={() =>
-                        navigation.navigate("Post Details", { id: el.id })
-                      }
-                    >
-                      <Image
-                        source={{ uri: el.image }}
-                        style={[styles.postGridImage]}
-                      />
-                    </TouchableOpacity>
-                  ))
-                ) : (
-                  <Text style={styles.postsHeading}>No posts yet!</Text>
-                )}
-              </View>
-            </>
-          )}
-        </View>
-      </View>
-    </ScrollView>
+    <UserProfileHOC
+      error={userState.error}
+      image={userState.image}
+      loading={userState.loading}
+      postsData={userState.posts}
+      showEdit={true}
+      user={user}
+      userData={userState.user}
+    />
   );
 }
 

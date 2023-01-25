@@ -2,10 +2,11 @@ import React, { useState } from "react";
 import { Button, StyleSheet, Text, View } from "react-native";
 import { signOut } from "firebase/auth";
 
+import { TabActions } from "@react-navigation/native";
+
 // Own Dependencies
 import { auth } from "../../firebase/config";
 import Loader from "../../components/UI/Loader";
-import { AuthContext } from "../../context/AuthContext";
 
 function LogoutScreen(props) {
   const [loading, setLoading] = useState(false);
@@ -16,6 +17,8 @@ function LogoutScreen(props) {
       setLoading(false);
 
       await signOut(auth);
+      TabActions.jumpTo("Login");
+
       alert(`You just sign out`);
     } catch (error) {
       setLoading(false);
