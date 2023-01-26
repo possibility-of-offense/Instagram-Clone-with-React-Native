@@ -55,7 +55,7 @@ function LoginScreen({ navigation }) {
       <Logo />
       <View style={styles.form}>
         <Formik
-          initialValues={{ email: "test@test.bg", password: "123456" }}
+          initialValues={{ email: "", password: "" }}
           onSubmit={(values) => handleLogin(values)}
           validationSchema={validationSchema}
         >

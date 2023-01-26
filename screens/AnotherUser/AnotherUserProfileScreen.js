@@ -119,6 +119,13 @@ function AnotherUserProfileScreen({ navigation, route }) {
             followers: increment(1),
           }
         );
+        // TEST
+        await addDoc(collection(db, "users", user.uid, "notifications"), {
+          userId: user.uid,
+          followedUser: anotherUserState.followerOfUser.id,
+        });
+        // TEST
+
         setAnotherUserState((prev) => ({
           ...prev,
           alreadyFollowed: true,
@@ -143,6 +150,7 @@ function AnotherUserProfileScreen({ navigation, route }) {
         );
       });
     } catch (error) {
+      console.log(error);
       setAnotherUserState((prev) => ({
         ...prev,
         error: `Couldn't follow the user! Try again!`,

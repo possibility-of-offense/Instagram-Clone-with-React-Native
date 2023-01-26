@@ -99,7 +99,6 @@ function AnotherUserPostDetailsScreen({ navigation, route }) {
         postId: route.params.id,
       });
     } catch (error) {
-      console.log(error);
       setAnotherUserState((prev) => ({
         ...prev,
         error: `Couldn't like the post! Try again!`,

@@ -29,6 +29,7 @@ import UserToFollowModal from "../components/UI/Modal/UserToFollowModal";
 import colors from "../themes/colors";
 import Loader from "../components/UI/Loader";
 import HomeUsersFeed from "./HomeUsersFeed";
+import HomeNavigationDrawer from "./HomeNavigationDrawer";
 
 const { height, width } = Dimensions.get("window");
 
@@ -51,12 +52,19 @@ function HomeScreen({ navigation, route }) {
         homeFollowingUser: followingState.homeScreenFollowingUser,
       })
         .then((d) => d)
-        .catch((err) => console.log(err));
+        .catch((err) =>
+          setFollowingState((prev) => ({
+            ...prev,
+            error: `Couldn't update user info! Try again!`,
+          }))
+        );
     }
   }, [followingState.homeScreenFollowingUser]);
 
   useFocusEffect(
     useCallback(() => {
+      navigation.setOptions({ title: "Hello back 😊" });
+
       const fetching = async () => {
         try {
           setFollowingState((prev) => ({ ...prev, loading: true }));
@@ -126,6 +134,8 @@ function HomeScreen({ navigation, route }) {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: colors.white,
+    borderTopColor: colors.dark,
+    borderTopWidth: 1,
     height: height,
     width: width,
   },

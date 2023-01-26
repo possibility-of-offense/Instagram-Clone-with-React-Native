@@ -12,6 +12,7 @@ import BottomTabItem from "../components/UI/Tab/BottomTabItem";
 import ProfileNavigator from "./ProfileNavigator";
 import LogoutScreen from "../screens/Auth/LogoutScreen";
 import SearchNavigator from "./SearchNavigator";
+import HomeNavigationDrawer from "../screens/HomeNavigationDrawer";
 
 const Tab = createBottomTabNavigator();
 
@@ -34,7 +35,7 @@ const AppNavigator = () => {
       }}
     >
       <Tab.Screen
-        component={HomeScreen}
+        component={HomeNavigationDrawer}
         name="Home"
         listeners={({ route }) => ({
           focus: () => {
@@ -45,6 +46,18 @@ const AppNavigator = () => {
           ...BottomTabItem(currentRoute, "home", "Home", "Home", "entypo"),
         }}
       />
+      {/* <Tab.Screen
+        component={HomeScreen}
+        name="Home"
+        listeners={({ route }) => ({
+          focus: () => {
+            setCurrentRoute(route.name);
+          },
+        })}
+        options={{
+          ...BottomTabItem(currentRoute, "home", "Home", "Home", "entypo"),
+        }}
+      /> */}
       <Tab.Screen
         component={AddPostScreen}
         name="Add Post"

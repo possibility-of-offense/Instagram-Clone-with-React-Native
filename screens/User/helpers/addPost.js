@@ -3,10 +3,14 @@ import { nanoid } from "nanoid";
 import {
   addDoc,
   collection,
+  collectionGroup,
   doc,
+  getDocs,
   increment,
+  query,
   serverTimestamp,
   updateDoc,
+  where,
 } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
@@ -25,6 +29,17 @@ const handleAddPost = async ({ navigation, post, setPost, user }) => {
 
   try {
     let userPostImageRef;
+
+    const followers = await getDocs(
+      query(
+        collectionGroup(db, "notifications"),
+        where("followedUser", "==", user.uid)
+      )
+    );
+    const mappedFollowers = followers.docs.map((d) => ({
+      id: d.id,
+      ...d.data(),
+    }));
 
     const blob = await new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
@@ -54,6 +69,21 @@ const handleAddPost = async ({ navigation, post, setPost, user }) => {
             popular: false,
           })
             .then((data) => {
+              mappedFollowers.forEach(async (fol) => {
+                await addDoc(collection(db, "notifications"), {
+                  userId: user.uid,
+                  username:
+                    user.username || user.displayName || user.email || null,
+                  userImage: user.photoURL,
+                  postId: data.id,
+                  postDescription: post.description
+                    .split(" ")
+                    .slice(0, 5)
+                    .join(" "),
+                  timestamp: serverTimestamp(),
+                });
+              });
+
               updateDoc(doc(db, "users", user.uid), {
                 posts: increment(1),
               })
@@ -90,6 +120,7 @@ const handleAddPost = async ({ navigation, post, setPost, user }) => {
         );
     });
   } catch (error) {
+    console.log(error);
     setPost((prev) => ({
       ...prev,
       error: "Couldn't upload the image! Try again!",

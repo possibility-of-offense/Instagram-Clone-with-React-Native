@@ -1,5 +1,7 @@
 import { NavigationContainer } from "@react-navigation/native";
 import { useAuth } from "./hooks/useAuth";
+// import { GestureHandlerRootView } from "react-native-gesture-handler";
+import "react-native-gesture-handler";
 
 // Own Dependecies
 import { AuthContext } from "./context/AuthContext";

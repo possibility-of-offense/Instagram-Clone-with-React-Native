@@ -23,7 +23,6 @@ import GoBack from "./GoBack";
 
 function AnotherUserCommentsScreen({ navigation, route }) {
   const [user, setUser] = useState({});
-  console.log("comments", route);
 
   const [commentsState, setCommentsState] = useState({
     comment: "",

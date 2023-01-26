@@ -78,7 +78,6 @@ function FollowingScreen({ navigation, route }) {
           setUser(userDoc.data());
           setLoading(false);
         } catch (error) {
-          console.log(error);
           setError(`Couldn't get users!`);
           setLoading(false);
         }
