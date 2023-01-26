@@ -10,14 +10,21 @@ import {
   createDrawerNavigator,
   useDrawerStatus,
 } from "@react-navigation/drawer";
+import { Entypo } from "@expo/vector-icons";
 
 // Own Dependencies
 
 import HomeScreen from "./HomeScreen";
 import { useAuth } from "../hooks/useAuth";
-import { useFocusEffect } from "@react-navigation/native";
 import UserImage from "../components/UI/UserImage";
-import { collection, getDocs, orderBy, where } from "firebase/firestore";
+import {
+  doc,
+  collection,
+  deleteDoc,
+  getDocs,
+  orderBy,
+  where,
+} from "firebase/firestore";
 import { db } from "../firebase/config";
 import Loader from "../components/UI/Loader";
 import colors from "../themes/colors";
@@ -33,7 +40,10 @@ function Notifications({ navigation, route }) {
     error: false,
     loading: false,
     notifications: [],
+    nothing: [],
   });
+
+  console.log(notificationState.nothing);
 
   const fetching = async () => {
     setNotificationState((prev) => ({ ...prev, loading: true }));
@@ -49,6 +59,18 @@ function Notifications({ navigation, route }) {
           where("userId", "==", user.followedUser),
           orderBy("timestamp", "desc")
         );
+
+        if (getPosts.docs.length === 0) {
+          setNotificationState((prev) => ({
+            ...prev,
+            nothing: [...notificationState.nothing, true],
+          }));
+        } else {
+          setNotificationState((prev) => ({
+            ...prev,
+            nothing: [...notificationState.nothing, false],
+          }));
+        }
         latest.push(
           ...getPosts.docs.map((d) => ({
             id: d.id,
@@ -79,6 +101,31 @@ function Notifications({ navigation, route }) {
     }
   };
 
+  const handleDelete = async (id) => {
+    setNotificationState((prev) => ({ ...prev, loading: true }));
+
+    try {
+      setNotificationState((prev) => ({
+        ...prev,
+        notifications: notificationState.notifications.filter(
+          (el) => el.id !== id
+        ),
+      }));
+      await deleteDoc(doc(db, "notifications", id));
+
+      setNotificationState((prev) => ({
+        ...prev,
+        loading: false,
+      }));
+    } catch (error) {
+      setNotificationState((prev) => ({
+        ...prev,
+        loading: false,
+        error: `Couldn't delete notification! Try again!`,
+      }));
+    }
+  };
+
   return (
     <>
       <Text
@@ -90,41 +137,59 @@ function Notifications({ navigation, route }) {
       {notificationState.loading ? (
         <Loader visible={true} />
       ) : (
-        <FlatList
-          data={notificationState.notifications}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => {
-            return (
-              <View key={item.id} style={styles.listItem}>
-                <TouchableOpacity
-                  onPress={() =>
-                    navigation.navigate("Search", {
-                      screen: "Another Post Details",
-                      params: {
-                        userId: item.userId,
-                        id: item.postId,
-                      },
-                    })
-                  }
-                >
-                  <View style={styles.listItemBody}>
-                    <UserImage image={item.image} styles={styles.image} />
-                    <Text style={styles.text}>
-                      <Text style={{ fontWeight: "bold" }}>
-                        {item.postDescription}
-                      </Text>{" "}
-                      by {item.username}
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-              </View>
-            );
-          }}
-          ItemSeparatorComponent={() => (
-            <View style={{ borderBottomWidth: 1, borderBottomColor: "#ddd" }} />
-          )}
-          onEndReachedThreshold={0}
-        />
+        <>
+          {notificationState.nothing.length > 0 &&
+            notificationState.nothing.every((el) => {
+              console.log(el);
+              return el === true;
+            }) && (
+              <Text style={{ textAlign: "center" }}>No notifications!</Text>
+            )}
+          <FlatList
+            data={notificationState.notifications}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => {
+              return (
+                <View key={item.id} style={styles.listItem}>
+                  <TouchableOpacity
+                    onPress={() =>
+                      navigation.navigate("Search", {
+                        screen: "Another Post Details",
+                        params: {
+                          userId: item.userId,
+                          id: item.postId,
+                        },
+                      })
+                    }
+                  >
+                    <View style={styles.listItemBody}>
+                      <UserImage image={item.image} styles={styles.image} />
+                      <Text style={styles.text}>
+                        <Text style={{ fontWeight: "bold" }}>
+                          {item.postDescription}
+                        </Text>{" "}
+                        by {item.username}
+                      </Text>
+                      <Entypo
+                        color={colors.primary}
+                        name="trash"
+                        onPress={() => handleDelete(item.id)}
+                        size={24}
+                        style={{ marginLeft: "auto" }}
+                      />
+                    </View>
+                  </TouchableOpacity>
+                </View>
+              );
+            }}
+            ItemSeparatorComponent={() => (
+              <View
+                style={{ borderBottomWidth: 1, borderBottomColor: "#ddd" }}
+              />
+            )}
+            onEndReachedThreshold={0}
+          />
+        </>
       )}
     </>
   );

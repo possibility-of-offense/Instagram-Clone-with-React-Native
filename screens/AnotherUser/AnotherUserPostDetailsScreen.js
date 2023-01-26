@@ -118,7 +118,7 @@ function AnotherUserPostDetailsScreen({ navigation, route }) {
           })
         }
       >
-        Back to All Posts
+        Check All Posts
       </GoBack>
       <PostDetailsHOC
         anotherUser={true}
