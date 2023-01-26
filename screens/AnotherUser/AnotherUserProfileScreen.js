@@ -152,6 +152,7 @@ function AnotherUserProfileScreen({ navigation, route }) {
 
   return (
     <UserProfileHOC
+      anotherUserRoutes={true}
       alreadyFollowed={anotherUserState.alreadyFollowed}
       error={anotherUserState.error}
       image={anotherUserState.image}

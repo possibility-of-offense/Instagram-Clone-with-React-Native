@@ -1,5 +1,13 @@
 import React, { useCallback, useState } from "react";
-import { StyleSheet } from "react-native";
+import {
+  FlatList,
+  Image,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TouchableWithoutFeedback,
+  View,
+} from "react-native";
 import {
   collection,
   query,
@@ -16,14 +24,17 @@ import { Dimensions } from "react-native";
 import colors from "../../themes/colors";
 import { db } from "../../firebase/config";
 import { useFocusEffect } from "@react-navigation/native";
-import PostsHOC from "../User/PostsHOC";
 
 const { height, width } = Dimensions.get("window");
 
 function AnotherUserPostsScreen({ navigation, route }) {
   let anotherUser = route.params.id;
 
-  const [postsState, setPostsState] = useState({
+  const [data, setData] = useState([]);
+  const [lastVisible, setLastVisible] = useState(null);
+  const [error, setError] = useState(false);
+
+  const [postsData, setPostsData] = useState({
     error: false,
     lastVisible: null,
     loading: false,
@@ -33,13 +44,9 @@ function AnotherUserPostsScreen({ navigation, route }) {
   useFocusEffect(
     useCallback(() => {
       navigation.setOptions({ title: "Back to Profile Page" });
-
       const fetching = async () => {
-        setPostsState((prev) => ({ ...prev, error: false }));
-
+        setError(false);
         try {
-          setPostsState((prev) => ({ ...prev, loading: true }));
-
           const q = query(
             collection(db, "users", anotherUser, "posts"),
             orderBy("timestamp"),
@@ -50,23 +57,14 @@ function AnotherUserPostsScreen({ navigation, route }) {
             id: document.id,
             ...document.data(),
           }));
-
           const docSnap = await getDoc(
             doc(db, "posts", mappedDocs[mappedDocs.length - 1].id)
           );
 
-          setPostsState((prev) => ({
-            ...prev,
-            lastVisible: docSnap,
-            loading: false,
-            posts: mappedDocs,
-          }));
+          setLastVisible(docSnap);
+          setData(mappedDocs);
         } catch (error) {
-          setPostsState((prev) => ({
-            ...prev,
-            error: `Couldn't get the posts! It is possible that the user has no posts yet!`,
-            loading: false,
-          }));
+          setError(`Couldn't get the posts`);
         }
       };
       fetching();
@@ -75,14 +73,12 @@ function AnotherUserPostsScreen({ navigation, route }) {
 
   const retrieveMore = async () => {
     try {
-      if (!postsState.lastVisible || !postsState.lastVisible.exists())
-        return null;
+      if (!lastVisible || !lastVisible.exists()) return null;
 
-      setPostsState((prev) => ({ ...prev, loading: true, error: false }));
       const q = query(
         collection(db, "posts"),
         orderBy("timestamp"),
-        startAfter(postsState.lastVisible),
+        startAfter(lastVisible),
         limit(5)
       );
 
@@ -100,29 +96,44 @@ function AnotherUserPostsScreen({ navigation, route }) {
         doc(db, "posts", mappedDocs[mappedDocs.length - 1].id)
       );
 
-      setPostsState((prev) => ({
-        ...prev,
-        loading: false,
-        lastVisible: docSnap,
-        posts: mappedDocs,
-      }));
+      setLastVisible(docSnap);
+      setData((prev) => prev.concat(mappedDocs));
     } catch (error) {
-      setPostsState((prev) => ({
-        ...prev,
-        error: `Couldn't get the posts`,
-        loading: false,
-      }));
+      setError(`Couldn't get more posts`);
     }
   };
-
   return (
-    <PostsHOC
-      error={postsState.error}
-      loading={postsState.loading}
-      posts={postsState.posts}
-      styles={styles}
-      retrieveMore={retrieveMore}
-    />
+    <SafeAreaView style={styles.container}>
+      {error && <Text style={styles.error}>{error}</Text>}
+      <FlatList
+        data={data}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <TouchableWithoutFeedback
+            onPress={() =>
+              navigation.navigate("Search", {
+                screen: "Another Post Details",
+                params: { id: item.id, userId: item.userId },
+              })
+            }
+            style={styles.listItem}
+          >
+            <View>
+              <Image source={{ uri: item.image }} style={styles.image} />
+              <Text style={styles.description}>
+                {item.description.split(" ").slice(0, 10).join(" ")}
+              </Text>
+            </View>
+          </TouchableWithoutFeedback>
+        )}
+        ItemSeparatorComponent={() => <View />}
+        ListHeaderComponent={() => {
+          <Text style={styles.headerText}>Items</Text>;
+        }}
+        onEndReached={retrieveMore}
+        onEndReachedThreshold={0}
+      />
+    </SafeAreaView>
   );
 }
 
@@ -152,17 +163,6 @@ const styles = StyleSheet.create({
   image: {
     width: "100%",
     height: 500,
-  },
-  seePostBtn: {
-    alignSelf: "center",
-    backgroundColor: colors.primary,
-    marginVertical: 15,
-    marginLeft: 15,
-    width: "50%",
-  },
-  seePostBtnUnderlay: { color: colors.primaryWithoutOpacity },
-  seePostBtnText: {
-    color: colors.white,
   },
 });
 

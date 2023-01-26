@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Button, StyleSheet, Text, View } from "react-native";
 import { signOut } from "firebase/auth";
 
-import { CommonActions, TabActions } from "@react-navigation/native";
+import { TabActions } from "@react-navigation/native";
 
 // Own Dependencies
 import { auth } from "../../firebase/config";
@@ -35,13 +35,6 @@ function LogoutScreen({ navigation }) {
       setLoading(false);
 
       await signOut(auth);
-      const resetAction = NavigationActions.reset({
-        index: 0,
-        actions: [],
-        key: null,
-      });
-
-      navigation.dispatch(resetAction);
 
       alert(`You just sign out`);
     } catch (error) {

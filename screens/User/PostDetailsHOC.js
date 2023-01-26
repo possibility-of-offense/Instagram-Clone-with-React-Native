@@ -8,15 +8,24 @@ import {
   View,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useNavigation, useRoute } from "@react-navigation/native";
 
 // Own Dependencies
 import Loader from "../../components/UI/Loader";
 import pluralizeWord from "../../helpers/pluralizeWord";
-import { useNavigation, useRoute } from "@react-navigation/native";
 
-function PostDetailsHOC({ error, handleLike, hasLiked, postObj, styles }) {
+function PostDetailsHOC({
+  anotherUser = null,
+  error,
+  handleLike,
+  hasLiked,
+  postObj,
+  styles,
+}) {
   const navigation = useNavigation();
   const route = useRoute();
+
+  console.log("test");
 
   if (error) {
     return <Text style={styles.error}>{error}</Text>;
@@ -55,24 +64,51 @@ function PostDetailsHOC({ error, handleLike, hasLiked, postObj, styles }) {
               <Text>{pluralizeWord("Like", postObj?.likes)}</Text>
             </View>
 
-            <TouchableHighlight
-              onPress={() =>
-                navigation.navigate("Comments", { postId: route.params.id })
-              }
-              style={styles.actionsIcon}
-              underlayColor="#ddd"
-            >
-              <View style={styles.commentsContainer}>
-                <MaterialCommunityIcons
-                  name="comment-outline"
-                  size={34}
-                  color="black"
-                />
-                <Text style={styles.commentsContainerText}>
-                  {pluralizeWord("Comment", postObj?.comments)}
-                </Text>
-              </View>
-            </TouchableHighlight>
+            {!anotherUser ? (
+              <TouchableHighlight
+                onPress={() =>
+                  navigation.navigate("Comments", { postId: route.params.id })
+                }
+                style={styles.actionsIcon}
+                underlayColor="#ddd"
+              >
+                <View style={styles.commentsContainer}>
+                  <MaterialCommunityIcons
+                    name="comment-outline"
+                    size={34}
+                    color="black"
+                  />
+                  <Text style={styles.commentsContainerText}>
+                    {pluralizeWord("Comment", postObj?.comments)}
+                  </Text>
+                </View>
+              </TouchableHighlight>
+            ) : (
+              <TouchableHighlight
+                onPress={() =>
+                  navigation.navigate("Search", {
+                    screen: "Another User Comments",
+                    params: {
+                      userId: route.params?.userId,
+                      postId: route.params.id,
+                    },
+                  })
+                }
+                style={styles.actionsIcon}
+                underlayColor="#ddd"
+              >
+                <View style={styles.commentsContainer}>
+                  <MaterialCommunityIcons
+                    name="comment-outline"
+                    size={34}
+                    color="black"
+                  />
+                  <Text style={styles.commentsContainerText}>
+                    {pluralizeWord("Comment", postObj.comments)}
+                  </Text>
+                </View>
+              </TouchableHighlight>
+            )}
           </View>
           <Text style={styles.description}>{postObj?.description}</Text>
         </ScrollView>

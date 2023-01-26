@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 
 // Own Dependencies
 import Button from "../../components/UI/Button";
@@ -19,6 +19,7 @@ import UserImage from "../../components/UI/UserImage";
 import UserProfileTab from "../../components/UI/Tab/UserProfileTab";
 
 function UserProfileHOC({
+  anotherUserRoutes = false,
   alreadyFollowed = null,
   error,
   image,
@@ -30,6 +31,7 @@ function UserProfileHOC({
   userData,
 }) {
   const navigation = useNavigation();
+  const route = useRoute();
 
   return (
     <ScrollView>
@@ -39,35 +41,35 @@ function UserProfileHOC({
           <UserImage image={image} styles={styles.userInfoImage} />
           <View style={styles.userInfoNameContainer}>
             <Text style={styles.userInfoName}>
-              {user?.displayName || user?.username || user.email}
+              {user?.displayName || user?.username || user?.email}
             </Text>
-            {handleFollow ? (
-              // prettier-ignore
-              !alreadyFollowed ? (
-              <Button
-                onPress={handleFollow}
-                title="Follow"
-                styleObject={{
-                  btn: styles.followBtn,
-                  btnText: styles.followBtnText,
-                }}
-                underlayColor={colors.primaryWithoutOpacity}
-              />
-            ) : (
-              <Button
-                disabled={true}
-                styleObject={{
-                  btn: styles.alreadyFollowedBtn,
-                  btnText: styles.alreadyFollowedBtnText,
-                }}
-                title="Already followed"
-              />
-            )
-            ) : null}
 
             {userData?.bio && (
               <Text style={{ marginTop: 10 }}>{userData?.bio}</Text>
             )}
+            {handleFollow ? (
+              // prettier-ignore
+              !alreadyFollowed ? (
+                <Button
+                  onPress={handleFollow}
+                  title="Follow"
+                  styleObject={{
+                    btn: styles.followBtn,
+                    btnText: styles.followBtnText,
+                  }}
+                  underlayColor={colors.primaryWithoutOpacity}
+                />
+              ) : (
+                <Button
+                  disabled={true}
+                  styleObject={{
+                    btn: styles.alreadyFollowedBtn,
+                    btnText: styles.alreadyFollowedBtnText,
+                  }}
+                  title="Already followed"
+                />
+              )
+            ) : null}
             {showEdit && (
               <Button
                 onPress={() => navigation.navigate("Edit Profile")}
@@ -89,35 +91,78 @@ function UserProfileHOC({
           ) : (
             <>
               <View style={styles.tabs}>
-                <UserProfileTab
-                  title={postsData.length}
-                  subTitle="Posts"
-                  onPress={() => navigation.navigate("All Posts")}
-                />
-                <UserProfileTab
-                  onPress={() => {
-                    navigation.navigate("Profile", {
-                      screen: "Followers",
-                      params: {
-                        userId: user.uid,
-                      },
-                    });
-                  }}
-                  title={userData?.followers || 0}
-                  subTitle="Followers"
-                />
-                <UserProfileTab
-                  onPress={() => {
-                    navigation.navigate("Profile", {
-                      screen: "Following",
-                      params: {
-                        userId: user.uid,
-                      },
-                    });
-                  }}
-                  title={userData?.following || 0}
-                  subTitle="Following"
-                />
+                {!anotherUserRoutes ? (
+                  <>
+                    <UserProfileTab
+                      title={postsData.length}
+                      subTitle="Posts"
+                      onPress={() => navigation.navigate("All Posts")}
+                    />
+                    <UserProfileTab
+                      onPress={() => {
+                        navigation.navigate("Profile", {
+                          screen: "Followers",
+                          params: {
+                            userId: user.uid,
+                          },
+                        });
+                      }}
+                      title={userData?.followers || 0}
+                      subTitle="Followers"
+                    />
+                    <UserProfileTab
+                      onPress={() => {
+                        navigation.navigate("Profile", {
+                          screen: "Following",
+                          params: {
+                            userId: user.uid,
+                          },
+                        });
+                      }}
+                      title={userData?.following || 0}
+                      subTitle="Following"
+                    />
+                  </>
+                ) : (
+                  <>
+                    <UserProfileTab
+                      title={user?.posts}
+                      subTitle="Posts"
+                      onPress={() =>
+                        navigation.navigate("Search", {
+                          screen: "Another User Posts",
+                          params: {
+                            id: user.userId,
+                          },
+                        })
+                      }
+                    />
+                    <UserProfileTab
+                      onPress={() => {
+                        navigation.navigate("Profile", {
+                          screen: "Followers",
+                          params: {
+                            userId: id,
+                          },
+                        });
+                      }}
+                      title={user?.followers || 0}
+                      subTitle="Followers"
+                    />
+                    <UserProfileTab
+                      onPress={() => {
+                        navigation.navigate("Profile", {
+                          screen: "Following",
+                          params: {
+                            userId: id,
+                          },
+                        });
+                      }}
+                      title={user?.following || 0}
+                      subTitle="Following"
+                    />
+                  </>
+                )}
               </View>
               {Array.isArray(postsData) && postsData.length > 0 && (
                 <View style={styles.checkAllBtnContainer}>
@@ -126,7 +171,17 @@ function UserProfileHOC({
                     {pluralizeWord("post", postsData.length, false)}!
                   </Text>
                   <Button
-                    onPress={() => navigation.navigate("All Posts")}
+                    onPress={
+                      !anotherUserRoutes
+                        ? () => navigation.navigate("All Posts")
+                        : () =>
+                            navigation.navigate("Search", {
+                              screen: "Another User Posts",
+                              params: {
+                                id: route.params.id,
+                              },
+                            })
+                    }
                     styleObject={{
                       btn: styles.checkAllBtn,
                       btnText: styles.checkAllBtnText,
@@ -143,8 +198,15 @@ function UserProfileHOC({
                   postsData.map((el, i) => (
                     <TouchableOpacity
                       key={el.id}
-                      onPress={() =>
-                        navigation.navigate("Post Details", { id: el.id })
+                      onPress={
+                        !anotherUserRoutes
+                          ? () =>
+                              navigation.navigate("Post Details", { id: el.id })
+                          : () =>
+                              navigation.navigate("Search", {
+                                screen: "Another Post Details",
+                                params: { id: el.id, userId: el.userId },
+                              })
                       }
                     >
                       <Image

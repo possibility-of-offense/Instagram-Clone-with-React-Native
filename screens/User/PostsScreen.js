@@ -1,13 +1,5 @@
 import React, { useCallback, useContext, useState } from "react";
-import {
-  FlatList,
-  Image,
-  SafeAreaView,
-  StyleSheet,
-  Text,
-  TouchableWithoutFeedback,
-  View,
-} from "react-native";
+import { StyleSheet, WithoutFeedback, View } from "react-native";
 import {
   collection,
   query,
@@ -25,8 +17,6 @@ import { AuthContext } from "../../context/AuthContext";
 import colors from "../../themes/colors";
 import { db } from "../../firebase/config";
 import { useFocusEffect } from "@react-navigation/native";
-import Button from "../../components/UI/Button";
-import LazyLoadListItems from "../../components/UI/ListItems/LazyLoadListItems";
 import PostsHOC from "./PostsHOC";
 
 const { height, width } = Dimensions.get("window");
@@ -121,6 +111,7 @@ function PostsScreen({ route }) {
       }));
     }
   };
+
   return (
     <PostsHOC
       error={postsState.error}

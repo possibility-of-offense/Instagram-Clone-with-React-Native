@@ -1,5 +1,14 @@
 import React, { useCallback, useState } from "react";
-import { StyleSheet } from "react-native";
+import {
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableHighlight,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import {
   addDoc,
   collection,
@@ -15,7 +24,8 @@ import { useFocusEffect } from "@react-navigation/native";
 
 // Own Dependencies
 import { db } from "../../firebase/config";
-import PostDetailsHOC from "../User/PostDetailsHOC";
+import Loader from "../../components/UI/Loader";
+import pluralizeWord from "../../helpers/pluralizeWord";
 
 function AnotherUserPostDetailsScreen({ navigation, route }) {
   let anotherUser = route.params?.userId;
@@ -32,13 +42,15 @@ function AnotherUserPostDetailsScreen({ navigation, route }) {
     error: false,
     loading: false,
     hasLiked: null,
-    post: {},
+    post: null,
     userObj: {},
   });
 
   useFocusEffect(
     useCallback(() => {
       setAnotherUserState((prev) => ({ ...prev, error: false }));
+
+      setError(false);
       const previousScreen =
         navigation.getState()?.routeNames[navigation.getState().index];
 
@@ -51,7 +63,7 @@ function AnotherUserPostDetailsScreen({ navigation, route }) {
 
       const fetching = async () => {
         try {
-          setAnotherUserState((prev) => ({ ...prev, loading: true }));
+          setAnotherUserState((prev) => ({ ...prev, error: false }));
 
           const [post, likes, user] = await Promise.all([
             getDoc(doc(db, "users", anotherUser, "posts", route.params.id)),
@@ -65,19 +77,13 @@ function AnotherUserPostDetailsScreen({ navigation, route }) {
             getDoc(doc(db, "users", anotherUser)),
           ]);
 
-          setAnotherUserState((prev) => ({
-            ...prev,
-            hasLiked: likes.docs.length > 0 ? true : false,
-            loading: true,
-            userObj: user.data(),
+          setPostObj({
             post: post.data(),
-          }));
+            hasLiked: likes.docs.length > 0 ? true : false,
+          });
+          setUserObj(user.data());
         } catch (error) {
-          setAnotherUserState((prev) => ({
-            ...prev,
-            error: `Couldn't get the post details!`,
-            loading: true,
-          }));
+          setError(`Couldn't get the post details!`);
         }
       };
 
@@ -109,16 +115,75 @@ function AnotherUserPostDetailsScreen({ navigation, route }) {
     }
   };
 
-  return (
-    <PostDetailsHOC
-      anotherUser={true}
-      error={anotherUserState.error}
-      hasLiked={anotherUserState.hasLiked}
-      handleLike={() => {}}
-      postObj={anotherUserState.post}
-      styles={styles}
-    />
-  );
+  if (error) {
+    return <Text style={styles.error}>{error}</Text>;
+  } else {
+    if (
+      Object.values(postObj).length > 0 &&
+      postObj.post !== null &&
+      postObj.hasLiked !== null
+    ) {
+      return (
+        <ScrollView style={styles.container}>
+          {error && <Text style={styles.error}>{error}</Text>}
+          <Image source={{ uri: postObj.post.image }} style={styles.image} />
+          <View style={styles.actions}>
+            <View style={styles.likesContainer}>
+              {!postObj.hasLiked ? (
+                <TouchableOpacity
+                  onPress={handleLike}
+                  style={styles.actionsIcon}
+                >
+                  <MaterialCommunityIcons
+                    name="cards-heart-outline"
+                    size={34}
+                    color="black"
+                  />
+                </TouchableOpacity>
+              ) : (
+                <View style={styles.actionsIcon}>
+                  <MaterialCommunityIcons
+                    name="cards-heart"
+                    size={34}
+                    color="red"
+                  />
+                </View>
+              )}
+              <Text>{pluralizeWord("Like", postObj.post.likes)}</Text>
+            </View>
+
+            <TouchableHighlight
+              onPress={() =>
+                navigation.navigate("Search", {
+                  screen: "Another User Comments",
+                  params: {
+                    userId: anotherUser,
+                    postId: route.params.id,
+                  },
+                })
+              }
+              style={styles.actionsIcon}
+              underlayColor="#ddd"
+            >
+              <View style={styles.commentsContainer}>
+                <MaterialCommunityIcons
+                  name="comment-outline"
+                  size={34}
+                  color="black"
+                />
+                <Text style={styles.commentsContainerText}>
+                  {pluralizeWord("Comment", postObj.post.comments)}
+                </Text>
+              </View>
+            </TouchableHighlight>
+          </View>
+          <Text style={styles.description}>{postObj.post.description}</Text>
+        </ScrollView>
+      );
+    } else {
+      return <Loader visible={true} />;
+    }
+  }
 }
 
 const styles = StyleSheet.create({

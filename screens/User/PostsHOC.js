@@ -4,6 +4,7 @@ import React from "react";
 import LazyLoadListItems from "../../components/UI/ListItems/LazyLoadListItems";
 
 function PostsHOC({ error, loading, posts, styles, retrieveMore }) {
+  console.log(posts);
   return (
     <LazyLoadListItems
       error={error}
