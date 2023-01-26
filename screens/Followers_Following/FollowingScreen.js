@@ -68,16 +68,17 @@ function FollowingScreen({ navigation, route }) {
 
           setUsers(
             usersDocs.docs.map((user) => ({
-              id: user.data().userToFollow.userId,
-              image: user.data().userToFollow.image,
+              id: user.data().followerOfUser.userId,
+              image: user.data().followerOfUser.image,
               username:
-                user.data().userToFollow.email ||
-                user.data().userToFollow.username,
+                user.data().followerOfUser.username ||
+                user.data().followerOfUser.email,
             }))
           );
           setUser(userDoc.data());
           setLoading(false);
         } catch (error) {
+          console.log(error);
           setError(`Couldn't get users!`);
           setLoading(false);
         }

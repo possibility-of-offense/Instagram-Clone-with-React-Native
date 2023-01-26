@@ -118,7 +118,7 @@ function HomeScreen({ navigation, route }) {
           setFollowingState((prev) => ({ ...prev, homeScreenFollowingUser }))
         }
       />
-      <HomeUsersFeed />
+      {followingState.followingUsers.length > 0 && <HomeUsersFeed />}
     </SafeAreaView>
   );
 }

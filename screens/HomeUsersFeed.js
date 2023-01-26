@@ -130,7 +130,6 @@ function HomeUsersFeed({}) {
         posts: postsState.posts.concat(mappedDocs),
       }));
     } catch (error) {
-      console.log(error);
       setPostsState((prev) => ({
         ...prev,
         error: `Couldn't get the posts`,

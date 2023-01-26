@@ -67,11 +67,11 @@ function FollowersScreen({ navigation, route }) {
 
           setUsers(
             usersDocs.docs.map((user) => ({
-              id: user.data().userFollowing.userId,
-              image: user.data().userFollowing.image,
+              id: user.data().followedByUser.userId,
+              image: user.data().followedByUser.image,
               username:
-                user.data().userFollowing.email ||
-                user.data().userFollowing.username,
+                user.data().followedByUser.username ||
+                user.data().followedByUser.email,
             }))
           );
           setUser(userDoc.data());
