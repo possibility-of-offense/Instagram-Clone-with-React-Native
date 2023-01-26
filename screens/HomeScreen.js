@@ -2,11 +2,8 @@ import { useFocusEffect } from "@react-navigation/native";
 import {
   collection,
   doc,
-  getDoc,
   getDocs,
-  onSnapshot,
   query,
-  runTransaction,
   updateDoc,
   where,
 } from "firebase/firestore";
@@ -17,15 +14,21 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  View,
 } from "react-native";
-
 import { Dimensions } from "react-native";
-import UserToFollowModal from "../components/UI/Modal/UserToFollowModal";
+
+// Own Dependencies
+
 import { AuthContext } from "../context/AuthContext";
+import Button from "../components/UI/Button";
 import { db } from "../firebase/config";
+import UserToFollowModal from "../components/UI/Modal/UserToFollowModal";
 
 // Own Dependecies
 import colors from "../themes/colors";
+import Loader from "../components/UI/Loader";
+import HomeUsersFeed from "./HomeUsersFeed";
 
 const { height, width } = Dimensions.get("window");
 
@@ -42,58 +45,49 @@ function HomeScreen({ navigation, route }) {
     loading: false,
   });
 
-  const [following, setFollowing] = useState([]);
-  const [homeFollowing, setHomeFollowing] = useState({});
-
   useEffect(() => {
-    if (Object.values(homeFollowing).length > 0) {
+    if (followingState.homeScreenFollowingUser) {
       updateDoc(doc(db, "users", user.uid), {
-        homeFollowing,
+        homeFollowingUser: followingState.homeScreenFollowingUser,
       })
         .then((d) => d)
         .catch((err) => console.log(err));
     }
-  }, [homeFollowing]);
+  }, [followingState.homeScreenFollowingUser]);
 
   useFocusEffect(
     useCallback(() => {
       const fetching = async () => {
         try {
-          await runTransaction(db, async (transcation) => {
-            // REFACTOR
-            const followingDocs = await getDocs(
-              query(
-                collection(db, "following"),
-                where("userToFollow.userId", "==", user.uid)
-              )
-            );
+          setFollowingState((prev) => ({ ...prev, loading: true }));
 
-            if (followingDocs.docs.length > 0) {
-              setFollowingState((prev) => ({
-                ...prev,
-                isThereAnyFollowings: false,
-              }));
-            }
-          });
-          // const followings = await getDocs(
-          //   query(
-          //     collection(db, "following"),
-          //     where("userToFollow.userId", "==", user.uid)
-          //   )
-          // );
+          const followingDocs = await getDocs(
+            query(collection(db, "following"), where("userId", "==", user.uid))
+          );
 
-          // const mapped = followings.docs.map((d) => ({
-          //   id: d.id,
-          //   userId: d.data().userId,
-          //   user: {
-          //     id: d.data().userToFollow.userId,
-          //     username:
-          //       d.data().userToFollow.username || d.data().userToFollow.email,
-          //   },
-          // }));
-          // setFollowing(mapped);
+          if (followingDocs.docs.length > 0) {
+            setFollowingState((prev) => ({
+              ...prev,
+              followingUsers: followingDocs.docs.map((d) => ({
+                id: d.id,
+                ...d.data(),
+              })),
+              isThereAnyFollowings: true,
+            }));
+          } else {
+            setFollowingState((prev) => ({
+              ...prev,
+              isThereAnyFollowings: false,
+            }));
+          }
+
+          setFollowingState((prev) => ({ ...prev, loading: false }));
         } catch (error) {
-          console.log(error);
+          setFollowingState((prev) => ({
+            ...prev,
+            error: `Error ocurred!`,
+            loading: false,
+          }));
         }
       };
       fetching();
@@ -102,22 +96,29 @@ function HomeScreen({ navigation, route }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      {following.length > 0 ? (
-        <TouchableOpacity onPress={() => setShowModal(true)}>
-          <Text>Show Modal</Text>
-        </TouchableOpacity>
+      {followingState.loading ? (
+        <Loader visible={true} />
+      ) : followingState.followingUsers.length > 0 ? (
+        <Button
+          onPress={() => setShowModal(true)}
+          title="Pick user who you want to see when on the Home Page"
+          styleObject={{ btn: styles.openModal, btnText: styles.openModalText }}
+          underlayColor={colors.primaryWithoutOpacity}
+        />
       ) : (
         <Text style={styles.text}>No users which have been followed!</Text>
       )}
-      {!followingState.isThereAnyFollowings && <Text>Test</Text>}
-      {/* <UserToFollowModal
+      <UserToFollowModal
         modalActions={{
           showModal,
           setShowModal,
         }}
-        following={following}
-        setHomeFollowing={setHomeFollowing}
-      /> */}
+        following={followingState.followingUsers}
+        setHomeFollowing={(homeScreenFollowingUser) =>
+          setFollowingState((prev) => ({ ...prev, homeScreenFollowingUser }))
+        }
+      />
+      <HomeUsersFeed />
     </SafeAreaView>
   );
 }
@@ -127,6 +128,15 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
     height: height,
     width: width,
+  },
+  openModal: {
+    alignSelf: "center",
+    backgroundColor: colors.primary,
+    width: "80%",
+    marginVertical: 15,
+  },
+  openModalText: {
+    color: colors.white,
   },
   text: {
     fontSize: 18,

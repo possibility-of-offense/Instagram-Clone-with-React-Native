@@ -1,5 +1,7 @@
-import React, { useCallback, useState } from "react";
-import { StyleSheet } from "react-native";
+import { useFocusEffect, useRoute } from "@react-navigation/native";
+import React, { useCallback, useContext, useState } from "react";
+import { StyleSheet, View } from "react-native";
+import { Dimensions } from "react-native";
 import {
   collection,
   query,
@@ -10,39 +12,49 @@ import {
   getDoc,
   doc,
 } from "firebase/firestore";
-import { Dimensions } from "react-native";
 
-// Own Dependecies
-import colors from "../../themes/colors";
-import { db } from "../../firebase/config";
-import { useFocusEffect } from "@react-navigation/native";
-import PostsHOC from "../User/PostsHOC";
-import GoBack from "./GoBack";
+// Own Dependencies
+import { AuthContext } from "../context/AuthContext";
+import colors from "../themes/colors";
+import { db } from "../firebase/config";
+import LazyLoadListItems from "../components/UI/ListItems/LazyLoadListItems";
 
 const { height, width } = Dimensions.get("window");
 
-function AnotherUserPostsScreen({ navigation, route }) {
-  let anotherUser = route.params.id;
+function HomeUsersFeed({}) {
+  const { user } = useContext(AuthContext);
+  const route = useRoute();
 
   const [postsState, setPostsState] = useState({
     error: false,
-    lastVisible: null,
     loading: false,
+    lastVisible: null,
     posts: [],
+    user: {},
   });
 
   useFocusEffect(
     useCallback(() => {
-      navigation.setOptions({ title: "Back to Profile Page" });
-
       const fetching = async () => {
-        setPostsState((prev) => ({ ...prev, error: false }));
+        setPostsState((prev) => ({ ...prev, loading: true, error: false }));
 
         try {
-          setPostsState((prev) => ({ ...prev, loading: true }));
+          const currentUser = await getDoc(doc(db, "users", user.uid));
+
+          if (!currentUser.exists()) {
+            return setPostsState((prev) => ({
+              ...prev,
+              error: `Error ocurred!`,
+            }));
+          }
 
           const q = query(
-            collection(db, "users", anotherUser, "posts"),
+            collection(
+              db,
+              "users",
+              currentUser.data().homeFollowingUser,
+              "posts"
+            ),
             orderBy("timestamp"),
             limit(5)
           );
@@ -51,12 +63,11 @@ function AnotherUserPostsScreen({ navigation, route }) {
             id: document.id,
             ...document.data(),
           }));
-
           const docSnap = await getDoc(
             doc(
               db,
               "users",
-              anotherUser,
+              currentUser.data().homeFollowingUser,
               "posts",
               mappedDocs[mappedDocs.length - 1].id
             )
@@ -64,14 +75,14 @@ function AnotherUserPostsScreen({ navigation, route }) {
 
           setPostsState((prev) => ({
             ...prev,
-            lastVisible: docSnap,
             loading: false,
+            lastVisible: docSnap,
             posts: mappedDocs,
           }));
         } catch (error) {
           setPostsState((prev) => ({
             ...prev,
-            error: `Couldn't get the posts! It is possible that the user has no posts yet!`,
+            error: `Couldn't get the posts`,
             loading: false,
           }));
         }
@@ -85,18 +96,18 @@ function AnotherUserPostsScreen({ navigation, route }) {
       if (!postsState.lastVisible || !postsState.lastVisible.exists())
         return null;
 
+      const currentUser = await getDoc(doc(db, "users", user.uid));
       const q = query(
-        collection(db, "users", anotherUser, "posts"),
+        collection(db, "users", currentUser.data().homeFollowingUser, "posts"),
         orderBy("timestamp"),
         startAfter(postsState.lastVisible),
         limit(5)
       );
 
       let documentSnapshots = await getDocs(q);
-
       if (documentSnapshots.docs.length === 0) return;
-      setPostsState((prev) => ({ ...prev, loading: true, error: false }));
 
+      setPostsState((prev) => ({ ...prev, loading: true, error: false }));
       const mappedDocs = documentSnapshots.docs.map((document) => ({
         id: document.id,
         ...document.data(),
@@ -106,7 +117,7 @@ function AnotherUserPostsScreen({ navigation, route }) {
         doc(
           db,
           "users",
-          anotherUser,
+          currentUser.data().homeFollowingUser,
           "posts",
           mappedDocs[mappedDocs.length - 1].id
         )
@@ -119,6 +130,7 @@ function AnotherUserPostsScreen({ navigation, route }) {
         posts: postsState.posts.concat(mappedDocs),
       }));
     } catch (error) {
+      console.log(error);
       setPostsState((prev) => ({
         ...prev,
         error: `Couldn't get the posts`,
@@ -128,28 +140,14 @@ function AnotherUserPostsScreen({ navigation, route }) {
   };
 
   return (
-    <>
-      <GoBack
-        onPress={() => {
-          navigation.navigate("Search", {
-            screen: "Another User",
-            params: {
-              id: route?.params?.id,
-            },
-          });
-        }}
-      >
-        Go back to Profile Page
-      </GoBack>
-      <PostsHOC
-        anotherUser={true}
-        error={postsState.error}
-        loading={postsState.loading}
-        posts={postsState.posts}
-        styles={styles}
-        retrieveMore={retrieveMore}
-      />
-    </>
+    <LazyLoadListItems
+      anotherUser={true}
+      data={postsState.posts}
+      error={postsState.error}
+      loading={postsState.loading}
+      styles={styles}
+      retrieveMore={retrieveMore}
+    />
   );
 }
 
@@ -159,10 +157,6 @@ const styles = StyleSheet.create({
     height: height,
     paddingBottom: 90,
     width: width,
-  },
-  description: {
-    fontSize: 17,
-    padding: 20,
   },
   error: {
     color: "red",
@@ -193,4 +187,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AnotherUserPostsScreen;
+export default HomeUsersFeed;

@@ -49,7 +49,7 @@ function CommentsHOC({
               return (
                 <View key={item.id} style={styles.listItem}>
                   <View style={styles.listItemBody}>
-                    {item.image ? (
+                    {/* {item.image ? (
                       <Image
                         source={{ uri: item.image }}
                         style={styles.image}
@@ -59,7 +59,8 @@ function CommentsHOC({
                         style={styles.image}
                         source={require("../../assets/images/person.jpg")}
                       />
-                    )}
+                    )} */}
+                    <UserImage image={item.image} styles={styles.image} />
                     <View style={styles.commentBody}>
                       <Text style={styles.commentBodyText}>
                         <Text style={styles.commentBodyUsername}>

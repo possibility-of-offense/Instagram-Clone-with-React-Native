@@ -176,6 +176,13 @@ const styles = StyleSheet.create({
     fontSize: 17,
     padding: 6,
   },
+  checkBtn: {
+    backgroundColor: colors.primary,
+    marginLeft: "auto",
+  },
+  checkBtnText: {
+    color: colors.white,
+  },
   container: {
     flex: 1,
   },
@@ -216,13 +223,6 @@ const styles = StyleSheet.create({
   username: {
     fontWeight: "bold",
     marginHorizontal: 10,
-  },
-  checkBtn: {
-    backgroundColor: colors.primary,
-    marginLeft: "auto",
-  },
-  checkBtnText: {
-    color: colors.white,
   },
 });
 

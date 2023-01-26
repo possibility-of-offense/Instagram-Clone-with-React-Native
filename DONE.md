@@ -8,3 +8,6 @@ PostDetailsScreen -> PostDetailsHOC
 CommentsScreen -> CommentsHOC
 SearchScreen
 AnotherUserProfileScreen
+AnotherUserPosts -> PostsHOC
+AnotherUserPostDetails -> PostDetailsHOC
+AnotherUserComments -> CommentsHOC

@@ -39,14 +39,17 @@ function SearchNavigator(props) {
       <Stack.Screen
         component={AnotherPostDetailsScreen}
         name="Another Post Details"
+        options={{ headerShown: false }}
       />
       <Stack.Screen
         component={AnotherUserPostsScreen}
         name="Another User Posts"
+        options={{ headerShown: false }}
       />
       <Stack.Screen
         component={AnotherUserCommentsScreen}
         name="Another User Comments"
+        options={{ headerShown: false }}
       />
       <Stack.Screen
         component={FollowerScreen}

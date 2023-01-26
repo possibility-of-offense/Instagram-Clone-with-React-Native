@@ -49,7 +49,13 @@ function PostsScreen({ route }) {
             ...document.data(),
           }));
           const docSnap = await getDoc(
-            doc(db, "posts", mappedDocs[mappedDocs.length - 1].id)
+            doc(
+              db,
+              "users",
+              user.uid,
+              "posts",
+              mappedDocs[mappedDocs.length - 1].id
+            )
           );
 
           setPostsState((prev) => ({
@@ -75,18 +81,17 @@ function PostsScreen({ route }) {
       if (!postsState.lastVisible || !postsState.lastVisible.exists())
         return null;
 
-      setPostsState((prev) => ({ ...prev, loading: true, error: false }));
       const q = query(
-        collection(db, "posts"),
+        collection(db, "users", user.uid, "posts"),
         orderBy("timestamp"),
         startAfter(postsState.lastVisible),
         limit(5)
       );
 
       let documentSnapshots = await getDocs(q);
-      if (!documentSnapshots.exists()) return;
 
       if (documentSnapshots.docs.length === 0) return;
+      setPostsState((prev) => ({ ...prev, loading: true, error: false }));
 
       const mappedDocs = documentSnapshots.docs.map((document) => ({
         id: document.id,
@@ -94,7 +99,13 @@ function PostsScreen({ route }) {
       }));
 
       const docSnap = await getDoc(
-        doc(db, "posts", mappedDocs[mappedDocs.length - 1].id)
+        doc(
+          db,
+          "users",
+          user.uid,
+          "posts",
+          mappedDocs[mappedDocs.length - 1].id
+        )
       );
 
       setPostsState((prev) => ({
@@ -150,7 +161,7 @@ const styles = StyleSheet.create({
   seePostBtn: {
     alignSelf: "center",
     backgroundColor: colors.primary,
-    marginVertical: 15,
+    marginVertical: 35,
     marginLeft: 15,
     width: "50%",
   },

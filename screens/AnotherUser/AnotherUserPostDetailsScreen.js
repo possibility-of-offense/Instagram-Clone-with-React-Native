@@ -16,17 +16,10 @@ import { useFocusEffect } from "@react-navigation/native";
 // Own Dependencies
 import { db } from "../../firebase/config";
 import PostDetailsHOC from "../User/PostDetailsHOC";
+import GoBack from "./GoBack";
 
 function AnotherUserPostDetailsScreen({ navigation, route }) {
   let anotherUser = route.params?.userId;
-
-  const [postObj, setPostObj] = useState({
-    post: null,
-    hasLiked: null,
-  });
-  const [userObj, setUserObj] = useState({});
-
-  const [error, setError] = useState(false);
 
   const [anotherUserState, setAnotherUserState] = useState({
     error: false,
@@ -87,10 +80,10 @@ function AnotherUserPostDetailsScreen({ navigation, route }) {
 
   const handleLike = async () => {
     try {
-      setPostObj({
+      setAnotherUserState({
         post: {
-          ...postObj.post,
-          likes: postObj.post.likes + 1,
+          ...anotherUserState.post,
+          likes: anotherUserState.post.likes + 1,
         },
         hasLiked: true,
       });
@@ -100,24 +93,43 @@ function AnotherUserPostDetailsScreen({ navigation, route }) {
       });
       await addDoc(collection(db, "likes"), {
         userId: anotherUser,
-        username: userObj.email || userObj.displayName,
-        image: userObj.photoURL || null,
+        username:
+          anotherUserState.userObj.username || anotherUserState.userObj.email,
+        image: anotherUserState.userObj.image || null,
         postId: route.params.id,
       });
     } catch (error) {
-      setError(`Couldn't like the post! Try again!`);
+      console.log(error);
+      setAnotherUserState((prev) => ({
+        ...prev,
+        error: `Couldn't like the post! Try again!`,
+      }));
     }
   };
 
   return (
-    <PostDetailsHOC
-      anotherUser={true}
-      error={anotherUserState.error}
-      hasLiked={anotherUserState.hasLiked}
-      handleLike={() => {}}
-      postObj={anotherUserState.post}
-      styles={styles}
-    />
+    <>
+      <GoBack
+        onPress={() =>
+          navigation.navigate("Search", {
+            screen: "Another User Posts",
+            params: {
+              id: route?.params?.userId,
+            },
+          })
+        }
+      >
+        Back to All Posts
+      </GoBack>
+      <PostDetailsHOC
+        anotherUser={true}
+        error={anotherUserState.error}
+        hasLiked={anotherUserState.hasLiked}
+        handleLike={handleLike}
+        postObj={anotherUserState.post}
+        styles={styles}
+      />
+    </>
   );
 }
 
