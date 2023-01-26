@@ -25,8 +25,6 @@ function PostDetailsHOC({
   const navigation = useNavigation();
   const route = useRoute();
 
-  console.log("test");
-
   if (error) {
     return <Text style={styles.error}>{error}</Text>;
   } else {

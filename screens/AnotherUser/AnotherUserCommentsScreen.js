@@ -12,39 +12,33 @@ import {
   where,
 } from "firebase/firestore";
 import React, { useCallback, useEffect, useState } from "react";
-import {
-  Dimensions,
-  FlatList,
-  Image,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Dimensions, StyleSheet } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 
 // Own Dependencies
-import AppInput from "../../components/UI/Input";
 import { db } from "../../firebase/config";
 import colors from "../../themes/colors";
-import formatDate from "../../helpers/formatDate";
-import Loader from "../../components/UI/Loader";
-import { useFocusEffect } from "@react-navigation/native";
+import CommentsHOC from "../User/CommentsHOC";
 
 function AnotherUserCommentsScreen({ navigation, route }) {
   const [user, setUser] = useState({});
-  const [comment, setComment] = useState("");
-  const [comments, setComments] = useState([]);
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [commentsState, setCommentsState] = useState({
+    comment: "",
+    comments: [],
+    error: false,
+    loading: false,
+    user: {},
+  });
 
   useEffect(() => {
-    if (error !== "") setError(false);
-  }, [comment]);
+    if (commentsState.error !== "")
+      setCommentsState((prev) => ({ ...prev, error: false }));
+  }, [commentsState.comment]);
 
   useFocusEffect(
     useCallback(() => {
-      setError(false);
-      setLoading(false);
+      setCommentsState((prev) => ({ ...prev, error: false, loading: false }));
 
       navigation.setOptions({
         title: "Back to Post",
@@ -57,12 +51,13 @@ function AnotherUserCommentsScreen({ navigation, route }) {
           orderBy("timestamp", "desc")
         ),
         (snapshot) => {
-          setComments(
-            snapshot.docs.map((document) => ({
+          setCommentsState((prev) => ({
+            ...prev,
+            comments: snapshot.docs.map((document) => ({
               id: document.id,
               ...document.data(),
-            }))
-          );
+            })),
+          }));
         }
       );
 
@@ -73,7 +68,10 @@ function AnotherUserCommentsScreen({ navigation, route }) {
             userObj.exists() ? { id: userObj.id, ...userObj.data() } : {}
           );
         } catch (error) {
-          setError(`Could't get the user! Try again!`);
+          setCommentsState((prev) => ({
+            ...prev,
+            error: `Could't get the user! Try again!`,
+          }));
         }
       };
 
@@ -84,10 +82,10 @@ function AnotherUserCommentsScreen({ navigation, route }) {
 
   // Add comment
   const handleAddComment = async () => {
-    if (comment === "") return setError("Fill the input");
+    if (commentsState.comment === "")
+      return setCommentsState((prev) => ({ ...prev, error: `Fill the input` }));
 
-    setLoading(true);
-    setComment("");
+    setCommentsState((prev) => ({ ...prev, comment: "", loading: true }));
 
     try {
       await addDoc(collection(db, "comments"), {
@@ -97,97 +95,112 @@ function AnotherUserCommentsScreen({ navigation, route }) {
         postId: route.params.postId,
         timestamp: serverTimestamp(),
         likes: 0,
-        commentBody: comment,
+        commentBody: commentsState.comment,
       });
 
       await updateDoc(doc(db, "users", user.id, "posts", route.params.postId), {
         comments: increment(1),
       });
 
-      setLoading(false);
+      setCommentsState((prev) => ({ ...prev, loading: false }));
     } catch (error) {
-      setLoading(false);
+      setCommentsState((prev) => ({ ...prev, loading: false }));
     }
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.commentForm}>
-        {user.photoURL ? (
-          <Image
-            source={{
-              uri: user.photoURL,
-            }}
-            style={styles.userPhoto}
-          />
-        ) : (
-          <Image
-            source={require("../../assets/images/person.jpg")}
-            style={styles.userPhoto}
-          />
-        )}
-        <View style={styles.inputContainer}>
-          <AppInput
-            autoComplete="off"
-            autoCorrect={false}
-            multiline={true}
-            onChange={setComment}
-            placeholder="Add a comment..."
-            styleObj={styles.input}
-            value={comment}
-          />
-          <Text onPress={handleAddComment} style={styles.addBtn}>
-            Post
-          </Text>
-        </View>
-        {error && <Text style={styles.errorMsg}>{error}</Text>}
-      </View>
-      <View style={styles.commentsGrid}>
-        {loading ? (
-          <Loader visible={true} />
-        ) : (
-          <FlatList
-            data={comments}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => {
-              return (
-                <View key={item.id} style={styles.listItem}>
-                  <View style={styles.listItemBody}>
-                    {item.image ? (
-                      <Image
-                        source={{ uri: item.image }}
-                        style={styles.image}
-                      />
-                    ) : (
-                      <Image
-                        style={styles.image}
-                        source={require("../../assets/images/person.jpg")}
-                      />
-                    )}
-                    <View style={styles.commentBody}>
-                      <Text style={styles.commentBodyText}>
-                        <Text style={styles.commentBodyUsername}>
-                          {item.username}
-                        </Text>{" "}
-                        {item.commentBody}
-                      </Text>
-                    </View>
-                  </View>
-                  <Text style={styles.date}>{formatDate(item.timestamp)}</Text>
-                </View>
-              );
-            }}
-            ItemSeparatorComponent={() => (
-              <View
-                style={{ borderBottomWidth: 1, borderBottomColor: "#ddd" }}
-              />
-            )}
-            onEndReachedThreshold={0}
-          />
-        )}
-      </View>
-    </View>
+    <CommentsHOC
+      comment={commentsState.comment}
+      comments={commentsState.comments}
+      error={commentsState.error}
+      handleAddComment={handleAddComment}
+      loading={commentsState.loading}
+      setComment={(comment) =>
+        setCommentsState((prev) => ({ ...prev, comment }))
+      }
+      styles={styles}
+      user={user}
+    />
   );
+
+  // return (
+  //   <View style={styles.container}>
+  //     <View style={styles.commentForm}>
+  //       {user.photoURL ? (
+  //         <Image
+  //           source={{
+  //             uri: user.photoURL,
+  //           }}
+  //           style={styles.userPhoto}
+  //         />
+  //       ) : (
+  //         <Image
+  //           source={require("../../assets/images/person.jpg")}
+  //           style={styles.userPhoto}
+  //         />
+  //       )}
+  //       <View style={styles.inputContainer}>
+  //         <AppInput
+  //           autoComplete="off"
+  //           autoCorrect={false}
+  //           multiline={true}
+  //           onChange={setComment}
+  //           placeholder="Add a comment..."
+  //           styleObj={styles.input}
+  //           value={comment}
+  //         />
+  //         <Text onPress={handleAddComment} style={styles.addBtn}>
+  //           Post
+  //         </Text>
+  //       </View>
+  //       {error && <Text style={styles.errorMsg}>{error}</Text>}
+  //     </View>
+  //     <View style={styles.commentsGrid}>
+  //       {loading ? (
+  //         <Loader visible={true} />
+  //       ) : (
+  //         <FlatList
+  //           data={comments}
+  //           keyExtractor={(item) => item.id}
+  //           renderItem={({ item }) => {
+  //             return (
+  //               <View key={item.id} style={styles.listItem}>
+  //                 <View style={styles.listItemBody}>
+  //                   {item.image ? (
+  //                     <Image
+  //                       source={{ uri: item.image }}
+  //                       style={styles.image}
+  //                     />
+  //                   ) : (
+  //                     <Image
+  //                       style={styles.image}
+  //                       source={require("../../assets/images/person.jpg")}
+  //                     />
+  //                   )}
+  //                   <View style={styles.commentBody}>
+  //                     <Text style={styles.commentBodyText}>
+  //                       <Text style={styles.commentBodyUsername}>
+  //                         {item.username}
+  //                       </Text>{" "}
+  //                       {item.commentBody}
+  //                     </Text>
+  //                   </View>
+  //                 </View>
+  //                 <Text style={styles.date}>{formatDate(item.timestamp)}</Text>
+  //               </View>
+  //             );
+  //           }}
+  //           ItemSeparatorComponent={() => (
+  //             <View
+  //               style={{ borderBottomWidth: 1, borderBottomColor: "#ddd" }}
+  //             />
+  //           )}
+  //           onEndReachedThreshold={0}
+  //         />
+  //       )}
+  //     </View>
+  //   </View>
+  // );
 }
 
 const styles = StyleSheet.create({
