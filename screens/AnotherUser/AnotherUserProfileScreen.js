@@ -162,6 +162,7 @@ function AnotherUserProfileScreen({ navigation, route }) {
       showEdit={false}
       user={anotherUserState.followerOfUser}
       userData={anotherUserState.followerOfUser}
+      id={id}
     />
   );
 }

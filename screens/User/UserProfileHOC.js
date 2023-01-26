@@ -29,6 +29,7 @@ function UserProfileHOC({
   showEdit,
   user,
   userData,
+  id = null,
 }) {
   const navigation = useNavigation();
   const route = useRoute();
