@@ -30,6 +30,7 @@ const AppNavigator = () => {
             );
           }
         },
+        unmountOnBlur: true,
       }}
     >
       <Tab.Screen
